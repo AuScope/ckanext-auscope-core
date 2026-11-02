@@ -7,6 +7,7 @@ volumes:
   ckan_storage:
   pg_data:
   solr_data:
+  solr_test_data:
 
 services:
   ckan-dev:
@@ -23,6 +24,8 @@ services:
       db:
         condition: service_healthy
       solr:
+        condition: service_started
+      solr-test:
         condition: service_started
       redis:
         condition: service_healthy
@@ -58,6 +61,14 @@ services:
     image: docker.io/ckan/ckan-solr:2.12-solr9
     volumes:
       - solr_data:/var/solr
+    restart: unless-stopped
+
+  # Tests use a physically separate Solr instance so CKAN's search-cleaning
+  # fixtures can never delete data from the development index.
+  solr-test:
+    image: docker.io/ckan/ckan-solr:2.12-solr9
+    volumes:
+      - solr_test_data:/var/solr
     restart: unless-stopped
 
   redis:

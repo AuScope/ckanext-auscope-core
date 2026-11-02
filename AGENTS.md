@@ -47,6 +47,8 @@ Never copy credentials or `.env` values from these repositories.
   approval.
 - Never commit `.env`, credentials or other secrets. `.env.example` holds
   placeholders only.
+- Keep automated tests pointed at the dedicated `solr-test` service. Never run CKAN
+  test fixtures against the development `solr` service or its volume.
 - Work autonomously. Ask only when blocked by missing credentials, an irreversible or
   high-risk action, or an architectural decision with significant consequences.
 - Record assumptions and decisions in `docs/decisions.md`.

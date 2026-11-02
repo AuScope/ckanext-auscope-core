@@ -52,9 +52,11 @@ The extension has no configuration options yet.
 
 ## Development environment
 
-The Compose stack runs `ckan/ckan-dev:2.12.1` with PostgreSQL 15, Solr 9
-(`ckan/ckan-solr:2.12-solr9`) and Redis 7. The extension is installed in editable
-mode and the repository is bind-mounted into the container, so code changes are live.
+The Compose stack runs `ckan/ckan-dev:2.12.1` with PostgreSQL 15, Redis 7 and two
+Solr 9 services (`ckan/ckan-solr:2.12-solr9`). Development and automated tests use
+physically separate Solr services and volumes, so test fixtures cannot clear the
+development search index. The extension is installed in editable mode and the
+repository is bind-mounted into the container, so code changes are live.
 
 ```bash
 cp .env.example .env            # PowerShell: Copy-Item .env.example .env
@@ -64,6 +66,10 @@ docker compose up -d --build    # or: podman compose up -d --build
 CKAN is served at http://localhost:5000 (port set by `CKAN_PORT_HOST`). The local
 sysadmin account is defined by `CKAN_SYSADMIN_*` in `.env`. `.env` holds local
 development values only and must never be committed.
+
+If `CKAN_DB_PASSWORD` contains URI-reserved characters, keep its raw value for the
+PostgreSQL setup script and percent-encode the password component in
+`CKAN_SQLALCHEMY_URL` and `TEST_CKAN_SQLALCHEMY_URL`.
 
 Stop the stack with `docker compose down` (add `-v` to also delete the database,
 Solr and file-storage volumes).
@@ -80,8 +86,9 @@ docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev pyt
 Tests use CKAN core's pytest plugin and fixtures. `test.ini` inherits
 `../../src/ckan/test-core.ini`, which resolves inside the `ckan-dev` container. For a
 CKAN source install, change the `use = config:` line to point at your CKAN source's
-`test-core.ini`. The tests share the development Solr core, so they may clear the
-local search index.
+`test-core.ini` and set `solr_url` to a test-only Solr core. In Compose, both
+`test.ini` and `TEST_CKAN_SOLR_URL` point at the dedicated `solr-test` service; do
+not point either at the development `solr` service.
 
 ## Linting
 

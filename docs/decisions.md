@@ -158,7 +158,7 @@ Checked on 2026-11-02 while setting up Issue #1.
 - Date: 2026-11-02. Status: Accepted.
 - Author name `AuScope`; version `0.1.0`.
 - `.env.example` values are throwaway local-development placeholders.
-- Dev and test runs share one Solr core, so tests may clear the dev search index.
+- Dev and test runs use physically separate Solr services and named volumes.
 - The PIDINST reference repository was only partly inspected (its compose file
   could not be read).
 - CI is unverified (ADR-012). Only Python 3.14 and 3.12 were exercised (ADR-003).
@@ -195,3 +195,57 @@ Container (CKAN 2.12.1):
 
 Not verified: the GitHub Actions workflow; Python 3.10, 3.11 and 3.13; installation
 into a non-Docker CKAN source install; `docker` (as opposed to Podman) runs.
+
+## ADR-016: Isolate automated tests from development Solr
+
+- Date: 2026-11-02. Status: Accepted.
+- Context: CKAN test fixtures clear the configured Solr core. Pointing tests at the
+  development service could destroy a developer's search index.
+- Decision: Compose runs a dedicated `solr-test` service with its own named volume,
+  `.env.example` sets `TEST_CKAN_SOLR_URL` to that service, and `test.ini` explicitly
+  overrides `solr_url` with it. The explicit override also protects commands that
+  bypass the image's start script. CI rewrites the hostname to its test-only `solr`
+  service.
+- Consequences: the local stack runs a second Solr container, trading some memory
+  and disk use for hard isolation of development data.
+
+## ADR-017: Quote PostgreSQL init values through psql variables
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: pass the CKAN role and password with `psql --set`, then interpolate them
+  with psql's identifier (`:"name"`) and literal (`:'name'`) quoting. Shell argument
+  arrays remain responsible for database names.
+- Consequences: quotes, dollar signs and other special characters cannot break or
+  inject SQL. URI-reserved characters must separately be percent-encoded in CKAN's
+  SQLAlchemy connection URLs.
+
+## ADR-018: Verify the non-editable distribution
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: graft all four runtime resource directories into the source manifest.
+  CI uses `pip install .`, then loads the installed CKAN entry point and checks the
+  asset, i18n, public and template directories from `/tmp`, outside the checkout.
+  pytest also runs from `/tmp` with `--pyargs` so it exercises the installed wheel
+  rather than importing the source checkout.
+- Consequences: empty resource directories (currently represented by tracked
+  placeholders) and Webassets definitions are present in wheel installations, not
+  only editable source installs.
+
+---
+
+## Verification record: Issue #1 review fixes (2026-11-02)
+
+Environment: Windows host, Podman 6.0.2, CKAN development image Python 3.14.10.
+
+| Check | Result |
+|---|---|
+| `podman compose config` and `up -d --build` | Parsed and started `db`, `redis`, `solr`, dedicated `solr-test`, and `ckan-dev` |
+| `ruff check .` | `All checks passed!` |
+| Workflow and Compose YAML parse | Passed with PyYAML in the CKAN container |
+| `pip wheel --no-deps -w dist .` | Built `ckanext_auscope_core-0.1.0-py3-none-any.whl` |
+| Non-editable wheel verification from `/tmp` | Entry point loaded from site-packages; assets, i18n, public, templates and `webassets.yml` present |
+| PostgreSQL init with special-character test password | Role and both databases created; quote, dollar sign, space and backslash handled without exposing the value |
+| `ckan -c test.ini db init` | `Upgrading DB: SUCCESS` |
+| Installed-package pytest (`--pyargs ckanext.auscope_core`) | `7 passed, 15 warnings in 6.03s` |
+
+The GitHub Actions run is recorded separately after the feature branch is pushed.

@@ -1,4 +1,7 @@
 include README.md
 include requirements.txt
-recursive-include ckanext/auscope_core *.html *.json *.js *.css *.mo *.yml
-recursive-include ckanext/auscope_core/public *.*
+graft ckanext/auscope_core/assets
+graft ckanext/auscope_core/i18n
+graft ckanext/auscope_core/public
+graft ckanext/auscope_core/templates
+global-exclude __pycache__ *.py[cod]

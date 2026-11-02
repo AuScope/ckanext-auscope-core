@@ -35,15 +35,42 @@ jobs:
       run: |
         pip install -r requirements.txt
         pip install -r dev-requirements.txt
-        pip install -e .
+        pip install .
+    - name: Verify non-editable installation
+      working-directory: /tmp
+      run: |
+        python - <<'PY'
+        from importlib.metadata import entry_points
+        from importlib.resources import files
+        from pathlib import Path
+        import os
+
+        (entry_point,) = entry_points(group="ckan.plugins", name="auscope_core")
+        entry_point.load()
+
+        package_root = files("ckanext.auscope_core")
+        for directory in ("assets", "i18n", "public", "templates"):
+            assert package_root.joinpath(directory).is_dir(), directory
+        assert package_root.joinpath("assets", "webassets.yml").is_file()
+
+        installed = Path(str(package_root)).resolve()
+        checkout = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+        assert not installed.is_relative_to(checkout), installed
+        PY
     - name: Setup extension
       run: |
         # Replace default path to CKAN core config file with the one on the container
         sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
+        # CI's Solr service is test-only; replace the local Compose service name.
+        sed -i -e 's|^solr_url = .*|solr_url = http://solr:8983/solr/ckan|' test.ini
 
         ckan -c test.ini db init
     - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.auscope_core --disable-warnings ckanext/auscope_core
+      working-directory: /tmp
+      run: >-
+        pytest --ckan-ini="$GITHUB_WORKSPACE/test.ini"
+        --cov=ckanext.auscope_core --disable-warnings
+        --pyargs ckanext.auscope_core
 
   lint:
     runs-on: ubuntu-latest

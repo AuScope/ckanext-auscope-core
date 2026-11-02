@@ -80,19 +80,27 @@ validators, harvesters, DOI/IGSN/RAiD integrations and CKAN core changes.
 ## Development environment
 
 `docker-compose.yml` runs `ckan-dev` (built from `docker/ckan/Dockerfile.dev`, based
-on `ckan/ckan-dev:2.12.1`), `db` (`postgres:15-alpine`), `solr`
-(`ckan/ckan-solr:2.12-solr9`) and `redis` (`redis:7-alpine`). The extension is
-installed editable at build time and the repository is bind-mounted over the same
-path at `/srv/app/src_extensions/ckanext-auscope-core`. `docker/postgres/initdb`
+on `ckan/ckan-dev:2.12.1`), `db` (`postgres:15-alpine`), separate `solr` and
+`solr-test` services (`ckan/ckan-solr:2.12-solr9`) and `redis` (`redis:7-alpine`).
+The extension is installed editable at build time and the repository is bind-mounted
+over the same path at `/srv/app/src_extensions/ckanext-auscope-core`.
+`docker/postgres/initdb`
 creates the CKAN role and the `ckan_default` and `ckan_test` databases. Configuration
 comes from `.env` (copied from `.env.example`) through the image's environment
 variable support and ckanext-envvars.
+The database initialisation script passes role names and passwords through psql
+variables with identifier/literal quoting. Connection URLs must still percent-encode
+reserved characters in passwords.
 
 ## Testing
 
 pytest runs inside the `ckan-dev` container with CKAN core's pytest plugin.
 `test.ini` inherits CKAN's `test-core.ini`, whose `TEST_CKAN_*` values the image
-fills in at start-up. Tests check the entry point, plugin loading, template and
-public directory registration, the Webassets definitions, `status_show` and home page
-rendering. CI (`.github/workflows/test.yml`) runs the same suite in
-`ckan/ckan-dev:2.12.1` and lints with ruff.
+fills in at start-up. It explicitly overrides `solr_url` with the `solr-test`
+service because commands that bypass the image start script do not rewrite CKAN's
+core test configuration. Tests check the entry point, plugin loading, template and
+public directory registration, the Webassets definitions, `status_show` and home
+page rendering. CI rewrites the hostname to its own test-only `solr` service,
+installs the built package non-editably, verifies its entry point and packaged
+runtime directories, runs the installed suite in `ckan/ckan-dev:2.12.1`, and lints
+with ruff.
