@@ -1,0 +1,197 @@
+# Decisions
+
+Architecture decision log. Each entry records context, decision and consequences.
+Add new entries at the end; mark replaced entries as `Superseded by ADR-NNN`.
+
+## Verified CKAN 2.12.1 facts
+
+Checked on 2026-11-02 while setting up Issue #1.
+
+| Fact | Value | Source |
+|---|---|---|
+| Python requirement | `python_requires >= 3.10`; classifiers 3.10 to 3.12 | [ckan-2.12.1 setup.cfg](https://raw.githubusercontent.com/ckan/ckan/ckan-2.12.1/setup.cfg) |
+| Supported Python range (docs) | CKAN 2.12 supports Python 3.10 to 3.14 | [installing/index.rst](https://github.com/ckan/ckan/blob/master/doc/maintaining/installing/index.rst) |
+| PostgreSQL | 12 or newer | [Install from source (2.12)](https://docs.ckan.org/en/2.12/maintaining/installing/install-from-source.html) |
+| CKAN's own CI services | `postgres:14`, `redis:7`, Python 3.10 | [ckan-2.12.1 pytest.yml](https://github.com/ckan/ckan/blob/ckan-2.12.1/.github/workflows/pytest.yml) |
+| Core pins | Flask 3.1.3, Jinja2 3.1.6, webassets 3.0.0, SQLAlchemy 2.0.51; dev: pytest 9.1.1, pytest-cov 7.1.0 | [requirements.in](https://raw.githubusercontent.com/ckan/ckan/ckan-2.12.1/requirements.in), dev-requirements.txt |
+| pytest plugin | CKAN core registers `ckan.tests.pytest_ckan.ckan_setup` and `.fixtures` as `pytest11` entry points | ckan-2.12.1 setup.cfg |
+| Extension template | `contrib/cookiecutter/ckan_extension`: pyproject.toml, minimal setup.cfg/setup.py, test.ini, IConfigurer plugin, CI workflow | [cookiecutter at ckan-2.12.1](https://github.com/ckan/ckan/tree/ckan-2.12.1/contrib/cookiecutter/ckan_extension) |
+| Dev image | `ckan/ckan-dev:2.12.1` (same digest as `2.12` and `2.12.1-py3.14`: `sha256:4f21dd73d19039cc91a43ed98635b91b31219de070d21161a380fc0829a971d0`) | [Docker Hub tags](https://hub.docker.com/v2/repositories/ckan/ckan-dev/tags?name=2.12) |
+| Dev image internals | Debian `python:3.14-slim-bookworm`; CKAN source `/srv/app/src/ckan`; `SRC_EXTENSIONS_DIR=/srv/app/src_extensions`; runs as `ckan`; writes `TEST_CKAN_*` into `test-core.ini` at start-up; has `curl` | [ckan-docker-base/ckan-2.12](https://github.com/ckan/ckan-docker-base/tree/main/ckan-2.12) |
+| Solr image | `ckan/ckan-solr:2.12-solr9` | Docker Hub |
+| CI Postgres image | `ckan/ckan-postgres-dev:2.12` (`ckan_default`/`pass`, db `ckan_test`, base `postgres:15-alpine`) | [ckan-postgres-dev](https://github.com/ckan/ckan-postgres-dev) |
+| Webassets loader | Reads `webassets.yaml` or `webassets.yml` from the `add_resource` directory; bundles named `<library>/<bundle>` | ckan-2.12.1 `ckan/lib/webassets_tools.py` |
+| Template paths | Final search list in `config["computed_template_paths"]` | ckan-2.12.1 `ckan/config/environment.py` |
+| Public paths | `add_public_directory` appends to `config["plugin_public_paths"]` (a list); `extra_public_paths` holds only the configured value; Flask serves both | ckan-2.12.1 `ckan/plugins/toolkit.py`, `ckan/config/middleware/flask_app.py` (read in the running container) |
+| ruff | 0.17.3 (latest at setup time) | [PyPI](https://pypi.org/pypi/ruff/json) |
+
+---
+
+## ADR-001: Packaging follows the CKAN 2.12.1 cookiecutter
+
+- Date: 2026-11-02. Status: Accepted.
+- Context: CKAN 2.12.1 ships an official extension template. Older AuScope
+  extensions keep all metadata in `setup.cfg`.
+- Decision: `pyproject.toml` holds all metadata and the `ckan.plugins` entry point.
+  `setup.cfg` keeps only `packages`, `namespace_packages`, `include_package_data`,
+  the Babel extractor and catalogue sections. `setup.py` keeps only
+  `message_extractors`.
+- Consequences: matches the target version's template. Babel config cannot move to
+  `pyproject.toml` yet. setuptools 84.2.1 prints a deprecation warning for
+  `namespace_packages` but builds the wheel; the line is kept because CKAN's
+  template and the other `ckanext-*` packages use the same namespace mechanism.
+
+## ADR-002: Names
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: distribution `ckanext-auscope-core`, import package
+  `ckanext.auscope_core`, plugin `auscope_core`, class `AuscopeCorePlugin` in
+  `ckanext/auscope_core/plugin.py`.
+
+## ADR-003: Python version range
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: `requires-python = ">=3.10"` (CKAN 2.12.1 `python_requires`).
+  Classifiers list 3.10 to 3.14 as documented for CKAN 2.12.
+- Consequences: only Python 3.14 (dev image) and 3.12 (local wheel build) have been
+  exercised. Other versions are declared, not tested.
+
+## ADR-004: No runtime dependencies
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: `dependencies = []`; `requirements.txt` contains only a comment. CKAN is
+  not declared as a dependency (CKAN extension convention: the host installs CKAN).
+  Build backend `setuptools>=64`, the first version with PEP 660 editable installs.
+
+## ADR-005: Tests use CKAN core's pytest plugin
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: no `pytest-ckan`; CKAN 2.12.1 registers its pytest plugin itself. pytest
+  and pytest-cov come from CKAN's dev requirements, preinstalled in `ckan/ckan-dev`.
+  `dev-requirements.txt` pins only `ruff==0.17.3`.
+
+## ADR-006: test.ini path
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: `use = config:../../src/ckan/test-core.ini`, which resolves when the
+  repository is mounted at `/srv/app/src_extensions/ckanext-auscope-core` in the
+  `ckan-dev` container. CI rewrites it to the absolute path with `sed`, as the
+  cookiecutter workflow does. Source installs edit the line (README).
+
+## ADR-007: Minimal plugin
+
+- Date: 2026-11-02. Status: Accepted.
+- Context: Issue #1 is the skeleton only; styling, branding and UI are separate
+  issues.
+- Decision: implement only `IConfigurer`. No template overrides, helpers or
+  blueprints. `templates/`, `public/` and `i18n/` contain `.gitkeep` only.
+- Consequences: enabling the plugin does not change the UI. Empty directories are
+  not packaged into a wheel (only editable installs have them). A non-editable
+  install with these directories missing has not been tested; the issue goes away
+  once the directories hold real files.
+
+## ADR-008: Placeholder Webassets bundles
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: `assets/webassets.yml` defines `auscope_core-css` and `auscope_core-js`,
+  each pointing to a comment-only file. No template includes them.
+- Consequences: establishes the bundle naming convention (`auscope_core/<bundle>`)
+  and avoids an empty YAML file.
+
+## ADR-009: Docker/Podman development environment
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: root `docker-compose.yml` (project name `ckanext-auscope-core`, no
+  `container_name`, fully qualified image names for Podman):
+  `docker.io/ckan/ckan-dev:2.12.1` via `docker/ckan/Dockerfile.dev`,
+  `docker.io/library/postgres:15-alpine` (same major as `ckan-postgres-dev:2.12`;
+  CKAN needs 12+), `docker.io/ckan/ckan-solr:2.12-solr9`,
+  `docker.io/library/redis:7-alpine` (CKAN CI uses Redis 7). The extension is
+  installed editable at build time and bind-mounted at runtime. Images are pinned by
+  tag; the ckan-dev digest is recorded above.
+- Consequences: works with `docker compose` and `podman compose` (verified with
+  Podman 6.0.2). No database, Solr or Redis ports are published. Avoids the
+  reference repositories' fixed container names, which collide between stacks.
+
+## ADR-010: Plugin list and order
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: dev env uses
+  `CKAN__PLUGINS="auscope_core image_view text_view datatables_view envvars"`.
+  `datastore` is dropped from the image default so no datastore database is needed.
+  `envvars` is last, as its README requires. Consumers list their
+  repository-specific plugin before `auscope_core`, because earlier plugins take
+  template priority.
+
+## ADR-011: License not set
+
+- Date: 2026-11-02. Status: Open.
+- Context: the repository has no LICENSE and none was specified. CKAN and the
+  reference extensions use AGPL.
+- Decision: no LICENSE file, no `license` field, no license classifier, no
+  `include LICENSE` in MANIFEST.in until maintainers choose a license.
+
+## ADR-012: CI workflow
+
+- Date: 2026-11-02. Status: Accepted (unverified).
+- Decision: `.github/workflows/test.yml` adapted from the cookiecutter: tests in
+  `ckan/ckan-dev:2.12.1` with `options: --user root` (the image user `ckan` cannot
+  `pip install`), services `ckan-solr:2.12-solr9`, `ckan-postgres-dev:2.12`,
+  `redis:7`; lint with `astral-sh/ruff-action@v3` pinned to ruff 0.17.3.
+- Consequences: the workflow has not run on GitHub because nothing has been pushed.
+  The YAML parses locally and the same test commands pass in the dev container.
+
+## ADR-013: AI documentation layout
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: `AGENTS.md` is canonical. `.kiro/steering/*.md` are short and point to
+  `AGENTS.md` and `docs/` instead of repeating rules.
+
+## ADR-014: Line endings
+
+- Date: 2026-11-02. Status: Accepted.
+- Decision: `.gitattributes` forces LF for `*.sh`, `Dockerfile*`, `*.yml`, `*.yaml`
+  and `*.ini`, so scripts run in Linux containers when checked out on Windows.
+
+## ADR-015: Assumptions
+
+- Date: 2026-11-02. Status: Accepted.
+- Author name `AuScope`; version `0.1.0`.
+- `.env.example` values are throwaway local-development placeholders.
+- Dev and test runs share one Solr core, so tests may clear the dev search index.
+- The PIDINST reference repository was only partly inspected (its compose file
+  could not be read).
+- CI is unverified (ADR-012). Only Python 3.14 and 3.12 were exercised (ADR-003).
+
+---
+
+## Verification record: Issue #1 (2026-11-02)
+
+Environment: Windows, Python 3.12.5, Podman 6.0.2 (WSL machine), Docker Compose
+v2.39.2 as the Podman compose provider. `docker` itself is not installed.
+
+Local (venv with ruff 0.17.3, PyYAML):
+
+| Command | Result |
+|---|---|
+| `python -m pip wheel --no-deps -w %TEMP%\acore-dist .` | `Successfully built ckanext-auscope-core` (`ckanext_auscope_core-0.1.0-py3-none-any.whl`); setuptools 84.2.1 `namespace_packages` deprecation warning |
+| Wheel listing | contains `plugin.py`, `assets/webassets.yml`, css/js files, tests; `entry_points.txt`: `[ckan.plugins] auscope_core = ckanext.auscope_core.plugin:AuscopeCorePlugin` |
+| `ruff check .` | `All checks passed!` |
+| `yaml.safe_load` of workflow and compose file | `yaml ok` |
+
+Container (CKAN 2.12.1):
+
+| Command | Result |
+|---|---|
+| `podman compose config` | parsed without errors |
+| `podman compose up -d --build` | exit 0; all four services started; `ckan-dev` healthcheck `healthy` |
+| `GET http://localhost:5000/api/3/action/status_show` | `ckan_version: 2.12.1`; `extensions: [auscope_core, image_view, text_view, datatables_view, envvars]` |
+| `GET http://localhost:5000/` | HTTP 200 |
+| `pip show ckanext-auscope-core` (in container) | Version 0.1.0, editable project location `/srv/app/src_extensions/ckanext-auscope-core`; Python 3.14.10 |
+| `ckan -c test.ini db init` | `Upgrading DB: SUCCESS` |
+| `pytest --ckan-ini=test.ini -p no:cacheprovider -v ckanext/auscope_core` (first run) | 1 failed, 6 passed: `test_public_directory_registered` read `extra_public_paths`, which does not hold plugin dirs in 2.12.1. Test fixed to read `plugin_public_paths`. |
+| same command (after fix) | `7 passed in 7.44s` (pytest 9.1.1, plugins include `ckan-2.12.1`, `cov-7.1.0`) |
+| `podman compose down` | containers and network removed; volumes kept |
+
+Not verified: the GitHub Actions workflow; Python 3.10, 3.11 and 3.13; installation
+into a non-Docker CKAN source install; `docker` (as opposed to Podman) runs.

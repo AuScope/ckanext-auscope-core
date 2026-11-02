@@ -1,0 +1,12 @@
+# Placeholder Webassets bundles. Registered as auscope_core/auscope_core-css
+# and auscope_core/auscope_core-js. No template includes them yet; shared
+# styling and scripts are added in later issues.
+auscope_core-css:
+  output: ckanext-auscope_core/%(version)s-auscope_core.css
+  contents:
+    - css/auscope_core.css
+
+auscope_core-js:
+  output: ckanext-auscope_core/%(version)s-auscope_core.js
+  contents:
+    - js/auscope_core.js

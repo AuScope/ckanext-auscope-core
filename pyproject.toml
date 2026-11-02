@@ -1,0 +1,45 @@
+[project]
+name = "ckanext-auscope-core"
+version = "0.1.0"
+description = "Shared AuScope branding, themes, layouts and UI components for CKAN 2.12"
+readme = "README.md"
+authors = [
+    {name = "AuScope"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+keywords = ["CKAN", "AuScope", "theme"]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/AuScope/ckanext-auscope-core"
+
+[project.entry-points."ckan.plugins"]
+auscope_core = "ckanext.auscope_core.plugin:AuscopeCorePlugin"
+
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+        "ignore::sqlalchemy.exc.SADeprecationWarning",
+        "ignore::sqlalchemy.exc.SAWarning",
+        "ignore::DeprecationWarning",
+]
+addopts = "--ckan-ini test.ini"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]

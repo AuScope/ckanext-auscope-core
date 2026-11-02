@@ -1,0 +1,4 @@
+# pytest and pytest-cov are pinned by CKAN 2.12.1's own dev-requirements.txt
+# and are preinstalled in the ckan/ckan-dev image. CKAN core also registers
+# the pytest plugin (--ckan-ini, fixtures), so pytest-ckan is not needed.
+ruff==0.17.3

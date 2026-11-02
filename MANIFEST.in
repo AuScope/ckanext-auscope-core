@@ -1,0 +1,4 @@
+include README.md
+include requirements.txt
+recursive-include ckanext/auscope_core *.html *.json *.js *.css *.mo *.yml
+recursive-include ckanext/auscope_core/public *.*
