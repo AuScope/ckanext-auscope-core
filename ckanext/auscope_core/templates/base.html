@@ -1,0 +1,9 @@
+{% ckan_extends %}
+
+{% block styles %}
+  {{ super() }}
+  {#- Shared AuScope theme. Consumers may override this block to replace or drop it. -#}
+  {% block auscope_core_styles %}
+    {% asset 'auscope_core/auscope_core-css' %}
+  {% endblock %}
+{% endblock %}

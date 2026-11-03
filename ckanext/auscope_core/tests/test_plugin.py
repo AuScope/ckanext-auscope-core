@@ -55,7 +55,11 @@ def test_webassets_bundles_reference_existing_files():
     with open(os.path.join(ASSETS_DIR, "webassets.yml")) as f:
         bundles = yaml.safe_load(f)
 
-    assert set(bundles) == {"auscope_core-css", "auscope_core-js"}
+    assert set(bundles) == {
+        "auscope_core-tokens",
+        "auscope_core-css",
+        "auscope_core-js",
+    }
     for bundle in bundles.values():
         assert bundle["output"].startswith("ckanext-auscope_core/")
         for path in bundle["contents"]:

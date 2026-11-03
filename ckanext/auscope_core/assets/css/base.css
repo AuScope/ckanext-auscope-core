@@ -1,0 +1,70 @@
+/*
+ * Bootstrap/CKAN variable mapping and global accessibility rules.
+ * Brand values come from tokens.css; this file only assigns them.
+ */
+
+/* Same selector as CKAN main.css, so later load order wins. */
+:root,
+[data-bs-theme=light] {
+  --bs-body-font-family: var(--auscope-font-family-base);
+  --bs-body-font-size: var(--auscope-font-size-base);
+  --bs-body-line-height: var(--auscope-line-height-base);
+  --bs-body-color: var(--auscope-color-text);
+  --bs-body-color-rgb: var(--auscope-color-text-rgb);
+  --bs-heading-color: var(--auscope-color-heading);
+  --bs-primary: var(--auscope-color-primary);
+  --bs-primary-rgb: var(--auscope-color-primary-rgb);
+  --bs-link-color: var(--auscope-color-primary);
+  --bs-link-color-rgb: var(--auscope-color-primary-rgb);
+  --bs-link-hover-color: var(--auscope-color-primary-hover);
+  --bs-link-hover-color-rgb: var(--auscope-color-primary-hover-rgb);
+  --bs-focus-ring-color: rgba(var(--auscope-color-primary-rgb), .25);
+}
+
+/* Links in running text are underlined: colour alone cannot mark them (WCAG 1.4.1). */
+.main :is(p, dd, blockquote, td) a:not(.btn):not(.tag):not(.nav-link):not(.page-link),
+.main .notes li a,
+.site-footer a {
+  text-decoration: underline;
+  text-underline-offset: .15em;
+}
+
+/*
+ * Visible keyboard focus. Each selector matches the specificity of a CKAN 2.12.1
+ * "outline: 0" rule on a rendered component and loads later, so it wins.
+ */
+:focus-visible,
+.btn:focus-visible,
+.btn-close:focus-visible,
+.accordion-button:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible,
+.page-link:focus-visible,
+.nav-link:focus-visible,
+.page-header .nav-tabs li a:focus-visible, /* 0,3,2: matches CKAN main.css line 3786 */
+.navbar-toggler:focus-visible {
+  outline: var(--auscope-focus-ring-width) solid var(--auscope-focus-ring-color);
+  outline-offset: var(--auscope-focus-ring-offset);
+}
+
+/* Skip link */
+.visually-hidden-focusable a:focus {
+  display: inline-block;
+  padding: .5rem 1rem;
+  background: var(--auscope-color-primary);
+  color: var(--auscope-color-on-primary);
+  position: relative;
+  z-index: 1050;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

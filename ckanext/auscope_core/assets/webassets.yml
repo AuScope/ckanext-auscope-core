@@ -1,10 +1,19 @@
-# Placeholder Webassets bundles. Registered as auscope_core/auscope_core-css
-# and auscope_core/auscope_core-js. No template includes them yet; shared
-# styling and scripts are added in later issues.
+# Webassets library "auscope_core". Bundles are referenced as auscope_core/<name>.
+# auscope_core-css is included by templates/base.html and preloads the tokens.
+auscope_core-tokens:
+  output: ckanext-auscope_core/%(version)s-auscope_core-tokens.css
+  contents:
+    - css/tokens.css
+
 auscope_core-css:
   output: ckanext-auscope_core/%(version)s-auscope_core.css
+  extra:
+    preload:
+      - auscope_core/auscope_core-tokens
   contents:
-    - css/auscope_core.css
+    - css/base.css
+    - css/components.css
+    - css/branding.css
 
 auscope_core-js:
   output: ckanext-auscope_core/%(version)s-auscope_core.js

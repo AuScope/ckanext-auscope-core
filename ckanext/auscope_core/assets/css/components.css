@@ -1,0 +1,59 @@
+/*
+ * Bootstrap components. Bootstrap variables where they exist; literal properties
+ * where CKAN main.css hard-codes colours.
+ */
+
+.btn-primary {
+  --bs-btn-color: var(--auscope-color-on-primary);
+  --bs-btn-bg: var(--auscope-color-primary);
+  --bs-btn-border-color: var(--auscope-color-primary);
+  --bs-btn-hover-color: var(--auscope-color-on-primary);
+  --bs-btn-hover-bg: var(--auscope-color-primary-hover);
+  --bs-btn-hover-border-color: var(--auscope-color-primary-hover);
+  --bs-btn-active-color: var(--auscope-color-on-primary);
+  --bs-btn-active-bg: var(--auscope-color-primary-hover);
+  --bs-btn-active-border-color: var(--auscope-color-primary-hover);
+  --bs-btn-disabled-color: var(--auscope-color-on-primary);
+  --bs-btn-disabled-bg: var(--auscope-color-primary);
+  --bs-btn-disabled-border-color: var(--auscope-color-primary);
+  --bs-btn-focus-shadow-rgb: var(--auscope-color-primary-rgb);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--auscope-color-primary);
+  --bs-btn-border-color: var(--auscope-color-primary);
+  --bs-btn-hover-color: var(--auscope-color-on-primary);
+  --bs-btn-hover-bg: var(--auscope-color-primary);
+  --bs-btn-hover-border-color: var(--auscope-color-primary);
+  --bs-btn-active-color: var(--auscope-color-on-primary);
+  --bs-btn-active-bg: var(--auscope-color-primary);
+  --bs-btn-active-border-color: var(--auscope-color-primary);
+  --bs-btn-disabled-color: var(--auscope-color-primary);
+  --bs-btn-disabled-border-color: var(--auscope-color-primary);
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--auscope-color-primary);
+  --bs-nav-pills-link-active-color: var(--auscope-color-on-primary);
+}
+
+.pagination {
+  --bs-pagination-color: var(--auscope-color-primary);
+  --bs-pagination-hover-color: var(--auscope-color-primary-hover);
+  --bs-pagination-focus-color: var(--auscope-color-primary-hover);
+  --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(var(--auscope-color-primary-rgb), .25);
+  --bs-pagination-active-color: var(--auscope-color-on-primary);
+  --bs-pagination-active-bg: var(--auscope-color-primary);
+  --bs-pagination-active-border-color: var(--auscope-color-primary);
+}
+
+.form-check-input:checked {
+  background-color: var(--auscope-color-primary);
+  border-color: var(--auscope-color-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--auscope-color-primary);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .075), 0 0 0 .25rem rgba(var(--auscope-color-primary-rgb), .25);
+}

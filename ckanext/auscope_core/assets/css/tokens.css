@@ -1,0 +1,57 @@
+/*
+ * AuScope design tokens (bundle auscope_core/auscope_core-tokens).
+ *
+ * These custom properties are the public customisation API of auscope_core.
+ * To change them, override them on :root in a consumer CSS bundle that is
+ * loaded after auscope_core (see README "Theme and branding").
+ * Keep each "-rgb" triplet in step with its colour: Bootstrap uses the
+ * triplets for link and focus colours.
+ */
+:root {
+  /* Palette */
+  --auscope-color-royal-blue: #282572;
+  --auscope-color-royal-blue-rgb: 40, 37, 114;
+  --auscope-color-royal-blue-dark: #221f61;
+  --auscope-color-royal-blue-dark-rgb: 34, 31, 97;
+  --auscope-color-teal: #59c2aa;
+  --auscope-color-black: #231f20;
+  --auscope-color-black-rgb: 35, 31, 32;
+  --auscope-color-grey: #d8d9d7;
+  --auscope-color-grey-light: #f2f2f1;
+  --auscope-color-white: #ffffff;
+
+  /* Semantic colours */
+  --auscope-color-primary: var(--auscope-color-royal-blue);
+  --auscope-color-primary-rgb: var(--auscope-color-royal-blue-rgb);
+  --auscope-color-primary-hover: var(--auscope-color-royal-blue-dark);
+  --auscope-color-primary-hover-rgb: var(--auscope-color-royal-blue-dark-rgb);
+  --auscope-color-on-primary: var(--auscope-color-white);
+  --auscope-color-accent: var(--auscope-color-teal); /* decorative only */
+  --auscope-color-text: var(--auscope-color-black);
+  --auscope-color-text-rgb: var(--auscope-color-black-rgb);
+  --auscope-color-heading: var(--auscope-color-primary);
+  --auscope-color-surface: var(--auscope-color-grey-light);
+  --auscope-color-border: var(--auscope-color-grey);
+
+  /* Typography */
+  --auscope-font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --auscope-font-size-base: 1rem;
+  --auscope-line-height-base: 1.5;
+
+  /* Focus */
+  --auscope-focus-ring-color: var(--auscope-color-primary);
+  --auscope-focus-ring-width: 3px;
+  --auscope-focus-ring-offset: 2px;
+
+  /* Components */
+  --auscope-masthead-bg: var(--auscope-color-white);
+  --auscope-masthead-color: var(--auscope-color-text);
+  --auscope-masthead-accent: var(--auscope-color-accent);
+  --auscope-nav-active-color: var(--auscope-color-primary);
+  --auscope-nav-active-indicator: var(--auscope-color-primary);
+  --auscope-account-masthead-bg: var(--auscope-color-surface);
+  --auscope-footer-bg: var(--auscope-color-primary);
+  --auscope-footer-color: var(--auscope-color-white);
+  --auscope-logo-height: 3rem;
+  --auscope-logo-height-sm: 2.25rem;
+}

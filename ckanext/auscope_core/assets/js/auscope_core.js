@@ -1,1 +1,2 @@
-/* ckanext-auscope-core shared scripts. Placeholder: scripts are added in a later issue. */
+/* ckanext-auscope-core shared scripts. Placeholder: the auscope_core-js bundle is
+   registered for later shared modules and is not included in pages. */

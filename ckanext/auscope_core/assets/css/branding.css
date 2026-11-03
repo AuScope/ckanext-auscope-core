@@ -1,0 +1,142 @@
+/*
+ * AuScope branding for CKAN components whose colours are hard-coded in
+ * CKAN 2.12.1 main.css. Logical properties keep main-rtl.css working.
+ *
+ * Dark-surface rule: every rule that gives a container a primary or
+ * primary-hover background must also set, on that container,
+ * --auscope-focus-ring-color and --bs-heading-color explicitly to the
+ * on-primary colour (or, for the footer, the footer colour), for example
+ *   --auscope-focus-ring-color: var(--auscope-color-on-primary);
+ *   --bs-heading-color: var(--auscope-color-on-primary);
+ * Never use "inherit": on a custom property it inherits the parent's value,
+ * which is royal blue, giving blue-on-blue focus rings and headings.
+ */
+
+/* Page surface (also drops CKAN's background images) */
+.main,
+.homepage .hero,
+.homepage .module-feeds {
+  background: var(--auscope-color-surface);
+}
+
+/* Masthead */
+.masthead {
+  background: var(--auscope-masthead-bg);
+  color: var(--auscope-masthead-color);
+  border-block-end: 4px solid var(--auscope-masthead-accent);
+}
+
+/* Text title, shown when ckan.site_logo is empty */
+.masthead .navbar hgroup h1 a,
+.masthead .navbar hgroup h2 {
+  color: var(--auscope-masthead-color);
+}
+
+/* Logo: CKAN's selector, with its min/max height limits neutralised */
+.masthead .navbar .logo img {
+  display: block;
+  block-size: var(--auscope-logo-height);
+  min-block-size: 0;
+  max-block-size: none;
+  inline-size: auto;
+  max-inline-size: 100%;
+}
+
+@media (max-width: 575.98px) {
+  .masthead .navbar .logo img {
+    block-size: var(--auscope-logo-height-sm);
+  }
+}
+
+/* Masthead navigation */
+/* 1. base (0,2,3) */
+.masthead .main-navbar ul li a {
+  color: var(--auscope-masthead-color);
+}
+
+/* 2. active (0,3,3) */
+.masthead .main-navbar ul li.active a {
+  background-color: transparent;
+  color: var(--auscope-nav-active-color);
+  box-shadow: inset 0 -3px 0 var(--auscope-nav-active-indicator);
+}
+
+/* 3. mouse/touch focus: beats CKAN's mobile #fff (0,3,3 / 0,4,3) */
+.masthead .main-navbar ul li a:focus {
+  color: var(--auscope-masthead-color);
+}
+
+.masthead .main-navbar ul li.active a:focus {
+  color: var(--auscope-nav-active-color);
+}
+
+/* 4. hover and keyboard focus last, so they win over 1-3 */
+.masthead .main-navbar ul li:hover a,
+.masthead .main-navbar ul li.active:hover a,
+.masthead .main-navbar ul li a:focus-visible,
+.masthead .main-navbar ul li.active a:focus-visible {
+  background-color: var(--auscope-color-primary);
+  color: var(--auscope-color-on-primary);
+}
+
+/* Menu toggler; its focus outline comes from base.css and is drawn on the masthead */
+.masthead .navbar-toggler {
+  background-color: var(--auscope-color-primary);
+  border-color: var(--auscope-color-primary);
+}
+
+/* Account bar */
+.account-masthead {
+  background: var(--auscope-account-masthead-bg);
+  color: var(--auscope-color-text);
+}
+
+.account-masthead .account ul li {
+  border-inline-start-color: var(--auscope-color-border);
+}
+
+.account-masthead .account ul li a {
+  color: var(--auscope-color-text);
+}
+
+.account-masthead .account ul li a:hover,
+.account-masthead .account ul li a:focus-visible {
+  background-color: var(--auscope-color-primary);
+  color: var(--auscope-color-on-primary);
+}
+
+/* Footer (dark surface) */
+.site-footer {
+  background: var(--auscope-footer-bg);
+  color: var(--auscope-footer-color);
+  --auscope-focus-ring-color: var(--auscope-footer-color);
+  --bs-heading-color: var(--auscope-footer-color);
+}
+
+.site-footer a,
+.site-footer label,
+.site-footer small,
+.site-footer .small,
+.site-footer .attribution p {
+  color: var(--auscope-footer-color);
+}
+
+/* Homepage search (dark surface) */
+.homepage .module-search {
+  --auscope-focus-ring-color: var(--auscope-color-on-primary);
+  --bs-heading-color: var(--auscope-color-on-primary);
+}
+
+/* Submit button over the white input: inset ring in primary */
+.homepage .module-search .search-input .btn {
+  --auscope-focus-ring-color: var(--auscope-color-primary);
+  --auscope-focus-ring-offset: calc(-1 * var(--auscope-focus-ring-width));
+}
+
+.homepage .module-search .search-form {
+  background: var(--auscope-color-primary);
+}
+
+.homepage .module-search .tags {
+  background: var(--auscope-color-primary-hover);
+}
