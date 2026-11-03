@@ -329,3 +329,21 @@ Environment: Windows host, Podman 6.0.2 with Docker Compose v2.39.2 as provider,
 
 The unwrapped pytest command was not re-run, because it would empty the
 development database again. CI was not re-run for this change.
+
+---
+
+## ADR-020: One codebase with tiered CKAN compatibility
+
+- Date: 2026-11-03. Status: Accepted.
+- Context: RAiD targets CKAN 2.12.1, PIDINST runs CKAN 2.11.4, and the Data and
+  Sample repositories currently run CKAN 2.10.1. Shared frontend code should simplify
+  upgrades without implying support that has not been tested.
+- Decision: CKAN 2.12.1 is the primary target, 2.11.4 is the secondary target, and
+  2.10.1 is a legacy target to evaluate during Data/Sample migration. Maintain one
+  implementation using shared public CKAN APIs. Introduce version-specific code only
+  for a reproduced incompatibility with test coverage. Compatibility is claimed only
+  after the full integration suite passes on the exact CKAN version.
+- Consequences: current plugin registration, template/public path helpers,
+  `CKANConfig` annotation and `webassets.yml` need no compatibility branches. The
+  package's Python >=3.10 requirement excludes older Python environments otherwise
+  accepted by CKAN 2.10.1 and 2.11.4. CKAN 2.11.4 and 2.10.1 are not yet verified.

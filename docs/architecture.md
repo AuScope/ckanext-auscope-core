@@ -2,10 +2,11 @@
 
 ## Overview
 
-`ckanext-auscope-core` is a CKAN 2.12.1 extension that holds the frontend pieces the
-AuScope repositories have in common. Each repository keeps its own extension for
-schemas, business logic and repository-specific pages, and enables `auscope_core`
-alongside it.
+`ckanext-auscope-core` holds the frontend pieces the AuScope CKAN repositories have
+in common. Each repository keeps its own extension for schemas, business logic and
+repository-specific pages, and enables `auscope_core` alongside it. The extension is
+developed primarily for CKAN 2.12.1 while retaining a single codebase for older
+AuScope CKAN versions where the shared implementation can be verified.
 
 Consumers: Data Repository, Sample Repository, Instrument Registry (PIDINST),
 RAiD Repository.
@@ -21,6 +22,46 @@ auscope_core                    (shared templates, snippets, assets, static file
         ▼
 CKAN 2.12.1 core                (never modified)
 ```
+
+## CKAN compatibility strategy
+
+| CKAN version | Role | Policy |
+|---|---|---|
+| 2.12.1 | Primary target | Development baseline and required release check; currently verified by the Issue #1 test record |
+| 2.11.4 | Secondary target | Required for PIDINST, but compatibility remains unverified until the full integration suite passes on this exact version |
+| 2.10.1 | Legacy target | Evaluate when Data and Sample migrate; do not advertise support before that evaluation passes |
+
+The project maintains one implementation across these versions where practical.
+Code uses public CKAN extension APIs shared by the targets. Compatibility wrappers,
+conditional imports and version checks are introduced only in response to a proven
+incompatibility and must be exercised by version-specific tests. A newer API is not
+backported pre-emptively, and the primary target is not constrained merely to retain
+an unused legacy pattern.
+
+The package currently requires Python 3.10 or newer. CKAN 2.11.4 supports Python
+3.9+, and CKAN 2.10.1 supports Python 3.7+, so deployments of those CKAN versions on
+Python 3.9 or older cannot install this package under the current policy. This is an
+environment constraint, not evidence that the extension works on the remaining
+version combinations.
+
+### Current implementation review
+
+The minimal plugin uses APIs available in all three target versions:
+
+- `SingletonPlugin` with `IConfigurer.update_config`;
+- `toolkit.add_template_directory` and `toolkit.add_public_directory`, which populate
+  `plugin_template_paths` and `plugin_public_paths`;
+- `toolkit.add_resource` and `assets/webassets.yml`; CKAN 2.10.1 requires the `.yml`
+  filename, while later versions also accept `.yaml`; and
+- `CKANConfig` from `ckan.common` for the method annotation.
+
+No compatibility abstraction is needed in the plugin today. The main future risk is
+template drift between CKAN releases: every core template override and block name
+must be exercised against each supported version. Webassets bundle registration and
+rendered asset URLs must likewise be tested in CKAN, not inferred from YAML parsing.
+Tests may inspect `plugin_template_paths`, `plugin_public_paths` and
+`computed_template_paths`, which are present in the reviewed versions, but rendered
+page and asset-loading tests are the compatibility contract.
 
 ## Plugin
 
@@ -107,3 +148,8 @@ loading, template and public directory registration, the Webassets definitions,
 test-only `solr` service, installs the built package non-editably, verifies its
 entry point and packaged runtime directories, runs the installed suite in
 `ckan/ckan-dev:2.12.1`, and lints with ruff.
+
+Only CKAN 2.12.1 has been exercised so far. Issue #5 contains the planned
+multi-version matrix. CKAN 2.11.4 and 2.10.1 remain unverified until their matrix
+jobs or migration evaluation run successfully; documentation and release metadata
+must not imply otherwise.

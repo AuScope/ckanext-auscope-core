@@ -6,16 +6,36 @@ refer back to this file; if they disagree, this file wins.
 
 ## Project
 
-`ckanext-auscope-core` is a standalone CKAN 2.12.1 extension that provides shared
-branding, themes, layouts, reusable UI components and common frontend functionality
-for four AuScope repositories: the Data Repository, the Sample Repository, the
-Instrument Registry (PIDINST) and the RAiD Repository. Its goals are easier
-maintenance, less duplicated code and simpler CKAN upgrades. Python package
-`ckanext.auscope_core`, CKAN plugin name `auscope_core`.
+`ckanext-auscope-core` is a standalone CKAN extension that provides shared branding,
+themes, layouts, reusable UI components and common frontend functionality for four
+AuScope repositories: the Data Repository, the Sample Repository, the Instrument
+Registry (PIDINST) and the RAiD Repository. Its goals are easier maintenance, less
+duplicated code and simpler CKAN upgrades. Python package `ckanext.auscope_core`,
+CKAN plugin name `auscope_core`.
+
+## CKAN compatibility policy
+
+Maintain one extension codebase across the AuScope CKAN versions where practical.
+
+| CKAN version | Role | Compatibility status |
+|---|---|---|
+| 2.12.1 | Primary development and release target | Verified only when the current test suite passes against this exact version |
+| 2.11.4 | Secondary target for PIDINST | Targeted, but not yet verified |
+| 2.10.1 | Legacy Data/Sample migration target | Evaluate during migration; not currently supported or verified |
+
+- Use CKAN 2.12.1 supported APIs as the baseline, choosing APIs also present in the
+  older targets when this does not compromise the primary target.
+- Do not claim compatibility with a CKAN version until the extension's integration
+  suite has passed against that exact version and the result is recorded.
+- Prefer common CKAN APIs and templates over compatibility wrappers. Add a
+  version-specific branch only for a demonstrated incompatibility covered by tests.
+- Test the oldest Python version allowed by both this package and each CKAN target.
+  The package currently requires Python 3.10 or newer, even where CKAN itself allows
+  an older Python version.
 
 ## Reference repositories
 
-The existing AuScope Data, Sample and PIDINST repositories are reference implementations. Inspect them to identify reusable components and established conventions. Do not modify these repositories. All implementation changes must be made within ckanext-auscope-core. Prefer CKAN 2.12.1 supported APIs and conventions over copying legacy implementations.
+The existing AuScope Data, Sample and PIDINST repositories are reference implementations. Inspect them to identify reusable components and established conventions. Do not modify these repositories. All implementation changes must be made within ckanext-auscope-core. Apply the compatibility policy above rather than copying legacy implementations.
 
 | Repository | Local path | Notes |
 |---|---|---|
