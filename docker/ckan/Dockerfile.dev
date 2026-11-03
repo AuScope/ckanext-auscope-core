@@ -1,0 +1,14 @@
+# Development image for ckanext-auscope-core on CKAN 2.12.1.
+# The extension is installed editable at build time; docker-compose.yml
+# bind-mounts the repository over the same path, so code edits are live.
+FROM docker.io/ckan/ckan-dev:2.12.1
+
+USER root
+
+COPY --chown=ckan-sys:ckan-sys . ${SRC_EXTENSIONS_DIR}/ckanext-auscope-core
+
+RUN pip install --no-cache-dir -r ${SRC_EXTENSIONS_DIR}/ckanext-auscope-core/requirements.txt \
+        -r ${SRC_EXTENSIONS_DIR}/ckanext-auscope-core/dev-requirements.txt && \
+    pip install --no-cache-dir -e ${SRC_EXTENSIONS_DIR}/ckanext-auscope-core
+
+USER ckan

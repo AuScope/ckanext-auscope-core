@@ -1,0 +1,81 @@
+# Local development environment for ckanext-auscope-core (CKAN 2.12.1).
+# Usage: copy .env.example to .env, then `docker compose up -d --build`
+# (or `podman compose up -d --build`).
+name: ckanext-auscope-core
+
+volumes:
+  ckan_storage:
+  pg_data:
+  solr_data:
+  solr_test_data:
+
+services:
+  ckan-dev:
+    build:
+      context: .
+      dockerfile: docker/ckan/Dockerfile.dev
+    env_file: .env
+    ports:
+      - "${CKAN_PORT_HOST:-5000}:5000"
+    volumes:
+      - ckan_storage:/var/lib/ckan
+      - ./:/srv/app/src_extensions/ckanext-auscope-core
+    depends_on:
+      db:
+        condition: service_healthy
+      solr:
+        condition: service_started
+      solr-test:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/api/3/action/status_show"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+
+  db:
+    image: docker.io/library/postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      CKAN_DB_USER: ${CKAN_DB_USER}
+      CKAN_DB_PASSWORD: ${CKAN_DB_PASSWORD}
+      CKAN_DB: ${CKAN_DB}
+      CKAN_TEST_DB: ${CKAN_TEST_DB}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  solr:
+    image: docker.io/ckan/ckan-solr:2.12-solr9
+    volumes:
+      - solr_data:/var/solr
+    restart: unless-stopped
+
+  # Tests use a physically separate Solr instance so CKAN's search-cleaning
+  # fixtures can never delete data from the development index.
+  solr-test:
+    image: docker.io/ckan/ckan-solr:2.12-solr9
+    volumes:
+      - solr_test_data:/var/solr
+    restart: unless-stopped
+
+  redis:
+    image: docker.io/library/redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
