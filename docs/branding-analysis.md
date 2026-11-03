@@ -104,6 +104,12 @@ stack, size, heading colour), primary button and link colours, the light masthea
 with royal-blue hover and active states, the page surface colour, logo sizing in the
 masthead, and the logos.
 
+A later check of the three public sites (computed styles, 2026-11-03) confirmed the
+same surfaces everywhere: `#f2f2f1` masthead and content, `#d8d9d7` footer with
+royal-blue text, and a white homepage search box over a royal-blue keyword strip.
+The resulting baseline and the remaining differences are in
+[design-baseline.md](design-baseline.md).
+
 **Repository-specific (stays in each consumer)**: Leaflet, jsTree and DataTables
 vendor bundles; map, composite-field, ROR, GCMD and DOI JS modules; scheming form
 styles (`.composite-*`, `.ror-*`, `.schema-table`); instrument cards; facet sidebars;

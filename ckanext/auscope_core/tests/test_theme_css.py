@@ -25,10 +25,14 @@ TEXT_PAIRS = [  # >= 4.5
     ("--auscope-footer-color", "--auscope-footer-bg"),
     ("--auscope-nav-active-color", "--auscope-masthead-bg"),
     ("--auscope-masthead-color", "--auscope-masthead-bg"),
+    ("--auscope-home-search-color", "--auscope-home-search-bg"),
+    ("--auscope-color-heading", "--auscope-home-search-bg"),
+    ("--auscope-color-on-primary", "--auscope-home-search-tags-bg"),
 ]
 NON_TEXT_PAIRS = [  # >= 3.0
     ("--auscope-focus-ring-color", "--auscope-color-white"),
     ("--auscope-focus-ring-color", "--auscope-color-surface"),
+    ("--auscope-focus-ring-color", "--auscope-home-search-bg"),
     ("--auscope-nav-active-indicator", "--auscope-masthead-bg"),
 ]
 
@@ -195,10 +199,10 @@ def test_tokens_declared_only_on_root(name):
     "selector, value",
     [
         (".site-footer", "var(--auscope-footer-color)"),
-        (".homepage .module-search", "var(--auscope-color-on-primary)"),
+        (".homepage .module-search .tags", "var(--auscope-color-on-primary)"),
     ],
 )
-def test_dark_surfaces_set_focus_ring_and_heading_colour(selector, value):
+def test_surfaces_set_focus_ring_and_heading_colour(selector, value):
     blocks = _blocks("branding.css", selector)
     assert blocks, selector
     merged = {}
@@ -208,6 +212,14 @@ def test_dark_surfaces_set_focus_ring_and_heading_colour(selector, value):
         merged.update(block)
     assert merged.get("--auscope-focus-ring-color") == value
     assert merged.get("--bs-heading-color") == value
+
+
+def test_light_homepage_search_box_sets_its_text_colour():
+    # CKAN 2.12.1 sets "color: #fff" on .homepage .module-search.
+    blocks = _blocks("branding.css", ".homepage .module-search .search-form")
+    assert len(blocks) == 1
+    assert blocks[0]["color"] == "var(--auscope-home-search-color)"
+    assert not _blocks("branding.css", ".homepage .module-search")
 
 
 def test_homepage_search_button_has_inset_primary_ring():

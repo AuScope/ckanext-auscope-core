@@ -105,7 +105,11 @@
   color: var(--auscope-color-on-primary);
 }
 
-/* Footer (dark surface) */
+/*
+ * Footer: light grey with royal-blue text by default (the legacy AuScope look).
+ * Text, headings and focus ring all follow --auscope-footer-color, so a consumer
+ * that sets a dark --auscope-footer-bg only needs to change the two footer tokens.
+ */
 .site-footer {
   background: var(--auscope-footer-bg);
   color: var(--auscope-footer-color);
@@ -121,22 +125,21 @@
   color: var(--auscope-footer-color);
 }
 
-/* Homepage search (dark surface) */
-.homepage .module-search {
-  --auscope-focus-ring-color: var(--auscope-color-on-primary);
-  --bs-heading-color: var(--auscope-color-on-primary);
+/* Homepage search: light search box (CKAN sets white text on .module-search) */
+.homepage .module-search .search-form {
+  background: var(--auscope-home-search-bg);
+  color: var(--auscope-home-search-color);
 }
 
-/* Submit button over the white input: inset ring in primary */
+/* Submit button inside the input: inset ring in primary */
 .homepage .module-search .search-input .btn {
   --auscope-focus-ring-color: var(--auscope-color-primary);
   --auscope-focus-ring-offset: calc(-1 * var(--auscope-focus-ring-width));
 }
 
-.homepage .module-search .search-form {
-  background: var(--auscope-color-primary);
-}
-
+/* Popular tags strip (dark surface) */
 .homepage .module-search .tags {
-  background: var(--auscope-color-primary-hover);
+  background: var(--auscope-home-search-tags-bg);
+  --auscope-focus-ring-color: var(--auscope-color-on-primary);
+  --bs-heading-color: var(--auscope-color-on-primary);
 }

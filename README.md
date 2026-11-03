@@ -119,11 +119,13 @@ not shipped (no redistribution licence); the base font is a system font stack.
 With the development stack running:
 
 1. Open http://localhost:5000/, `/dataset`, `/user/login` and `/about`. Expect a
-   white masthead with the AuScope logo and a teal line under it, a light grey page
-   background, and a royal-blue footer with white text.
-2. Press Tab to see focus rings and the skip link. In the homepage search box and
-   on "Popular tags" the outline is white on blue; on the search submit button it
-   is blue, inside the button.
+   light grey masthead with the AuScope logo and a teal line under it, a light grey
+   page background, a white homepage search box above a royal-blue "Popular tags"
+   strip, and a grey footer with royal-blue text. The intended look is described in
+   [docs/design-baseline.md](docs/design-baseline.md).
+2. Press Tab to see focus rings and the skip link. Outlines are royal blue, except
+   on "Popular tags" (white on blue); on the search submit button the outline is
+   inside the button.
 3. On a dataset page, Tab through the Dataset / Groups / Activity tabs and confirm
    the outline is visible.
 4. Narrow the window below 992 px and 576 px. At 375 px, Tab to the menu toggler
@@ -195,7 +197,7 @@ ruff check .
 ```
 ckanext-auscope-core/
 ├── AGENTS.md                    # AI development instructions (canonical rules)
-├── docs/                        # architecture.md, decisions.md (ADR log), branding-analysis.md
+├── docs/                        # architecture.md, decisions.md (ADR log), branding-analysis.md, design-baseline.md
 ├── .kiro/steering/              # Kiro steering files (point to AGENTS.md and docs/)
 ├── .github/workflows/test.yml   # CI: tests in ckan/ckan-dev:2.12.1, ruff lint
 ├── docker-compose.yml           # Development stack: CKAN, PostgreSQL, Solr, Redis
@@ -232,3 +234,5 @@ ckanext-auscope-core/
 - [docs/decisions.md](docs/decisions.md): technical decisions and verification records
 - [docs/branding-analysis.md](docs/branding-analysis.md): analysis of the reference
   repositories' branding (Issue #2)
+- [docs/design-baseline.md](docs/design-baseline.md): shared visual baseline and
+  differences from the legacy sites

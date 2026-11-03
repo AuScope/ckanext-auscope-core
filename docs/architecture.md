@@ -138,10 +138,15 @@ in comments.
 Rules that keep the theme accessible (ADR-024): brand values only in
 `tokens.css`; prose links underlined; focus outlines never removed, with one
 `:focus-visible` selector per CKAN `outline: 0` rule on a rendered component;
-dark containers (`.site-footer`, `.homepage .module-search`) set
-`--auscope-focus-ring-color` and `--bs-heading-color` to explicit `var(...)` values;
-teal is decorative only. `tests/test_theme_css.py` checks token contrast (WCAG AA)
-and these rules statically.
+containers with their own colour scheme (`.site-footer`, the homepage
+`.homepage .module-search .tags` strip) set `--auscope-focus-ring-color` and
+`--bs-heading-color` to explicit `var(...)` values; teal is decorative only.
+`tests/test_theme_css.py` checks token contrast (WCAG AA) and these rules
+statically.
+
+The intended look (surfaces, footer, homepage search, typography) and the
+deliberate differences from the legacy sites are in
+[design-baseline.md](design-baseline.md).
 
 Consumers customise by overriding tokens in a later-loaded bundle, by
 `ckan.site_custom_css`, by overriding `auscope_core_styles`, or through

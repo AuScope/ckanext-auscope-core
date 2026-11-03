@@ -44,14 +44,17 @@
   --auscope-focus-ring-offset: 2px;
 
   /* Components */
-  --auscope-masthead-bg: var(--auscope-color-white);
+  --auscope-masthead-bg: var(--auscope-color-surface);
   --auscope-masthead-color: var(--auscope-color-text);
   --auscope-masthead-accent: var(--auscope-color-accent);
   --auscope-nav-active-color: var(--auscope-color-primary);
   --auscope-nav-active-indicator: var(--auscope-color-primary);
   --auscope-account-masthead-bg: var(--auscope-color-surface);
-  --auscope-footer-bg: var(--auscope-color-primary);
-  --auscope-footer-color: var(--auscope-color-white);
+  --auscope-footer-bg: var(--auscope-color-grey);
+  --auscope-footer-color: var(--auscope-color-primary);
+  --auscope-home-search-bg: var(--auscope-color-white);
+  --auscope-home-search-color: var(--auscope-color-text);
+  --auscope-home-search-tags-bg: var(--auscope-color-primary);
   --auscope-logo-height: 3rem;
   --auscope-logo-height-sm: 2.25rem;
 }

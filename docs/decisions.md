@@ -455,6 +455,28 @@ development database again. CI was not re-run for this change.
 - Consequences: merge in the order Issue #1 → #5 → #2, or rebase this branch onto
   `main` after those branches have merged.
 
+## ADR-027: Light surfaces aligned with the legacy sites
+
+- Date: 2026-11-03. Status: Accepted. Amends the surface colours chosen for Issue #2.
+- Context: the Data, Sample and PIDINST public sites all render a `#f2f2f1`
+  masthead, a `#d8d9d7` footer with royal-blue text (`#282572`, 9.28:1), and a white
+  homepage search box over a royal-blue keyword strip. The first core theme used a
+  white masthead, a royal-blue footer and a royal-blue search box. Only the legacy
+  muted footer text (`#7e7caa`, 2.77:1) fails WCAG AA.
+- Decision: change tokens only: `--auscope-masthead-bg` to the surface colour,
+  `--auscope-footer-bg` / `--auscope-footer-color` to grey / royal blue, and new
+  `--auscope-home-search-bg`, `--auscope-home-search-color` and
+  `--auscope-home-search-tags-bg` (white, text, royal blue). The footer still takes
+  its focus-ring and heading colours from `--auscope-footer-color`, so a consumer
+  can restore a dark footer by changing the two footer tokens. The dark-surface rule
+  moves from `.homepage .module-search` to the `.tags` strip. No muted footer colour
+  is added. The teal line under the masthead stays as the brand accent.
+- Consequences: one look across all four repositories with no new selectors or
+  templates. Footer content and layout, header text, and the homepage layout remain
+  Issue #3. CKAN's white "Powered by ckan" footer image is faint on grey until
+  Issue #3 replaces the footer. Differences kept on purpose are listed in
+  `docs/design-baseline.md`.
+
 ---
 
 ## Verification record: Issue #2 (2026-11-03)
@@ -490,3 +512,21 @@ keyboard and screen-reader walkthrough by a person; the menu toggler opened and 
 links tapped at 375 px; RTL rendering. CKAN 2.12.1 itself overflows a 375 px
 viewport by 6 px (`.row` negative margins in the page and footer); this exists with
 the AuScope stylesheets removed and is not changed by this issue.
+
+## Verification record: Issue #2 visual consistency review (2026-11-03)
+
+| Check | Result |
+|---|---|
+| Live legacy sites (headless Edge, GET only), home, `/dataset/` and one record page at 1280 and 375 px | captured for Data and PIDINST; Sample home and list only (no record link found). Screenshots and computed styles in `.agents/tasks/screenshots/legacy/` (not committed) |
+| `ruff check .` (ruff 0.17.3) | `All checks passed!` |
+| `pytest --ckan-ini=test.ini -p no:cacheprovider -v ckanext/auscope_core` | `61 passed` |
+| Headless Edge, 1280×900 and 375×800, home, `/dataset`, demo dataset, `/user/login` | 58 of 58 checks passed: masthead `rgb(242, 242, 241)`; footer `rgb(216, 217, 215)` with royal-blue text, links and focus ring; white search box with royal-blue heading; royal-blue tags strip with white heading and white tag focus ring; login button royal blue. 0 console errors, 0 page errors, 0 responses ≥ 400 |
+| Wheel built and installed into a clean venv | entry point present; 4 CSS files, JS placeholder, `base.html`, 4 PNGs and `ASSETS-LICENSES.md` packaged |
+| Reference repositories | HEAD and `git status --porcelain` identical before and after |
+
+Found during the review: running the test suite in `ckan-dev` emptied the
+development database (the demo dataset, organisation and user were gone afterwards,
+and had to be re-seeded before the browser check). The likely cause is that the
+container's `CKAN_SQLALCHEMY_URL` environment variable overrides `sqlalchemy.url`
+from `test.ini`. Not changed here; it needs its own fix, in the same way ADR-016
+isolated Solr.

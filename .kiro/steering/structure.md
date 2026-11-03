@@ -11,7 +11,7 @@ ckanext/auscope_core/
 ├── i18n/          # Translation catalogues
 └── tests/         # pytest tests (test_<module>.py)
 docker/            # Dev image, test-env.sh (test connection wrapper), PostgreSQL init
-docs/              # architecture.md, decisions.md, branding-analysis.md
+docs/              # architecture.md, decisions.md, branding-analysis.md, design-baseline.md
 ```
 
 Where new things go:

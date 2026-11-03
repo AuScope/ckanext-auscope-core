@@ -1,7 +1,7 @@
 # Asset licences and attribution
 
-Licensing and provenance for the files under `public/auscope_core/` and the CSS in
-`assets/css/`. Every file in `public/auscope_core/images/` must have an entry here
+Licensing and provenance for the files under `public/auscope_core/` and under
+`assets/`. Every file in `public/auscope_core/images/` must have an entry here
 (checked by `tests/test_theme_css.py`).
 
 Source repository for the images (read-only reference, PIDINST):
@@ -53,8 +53,9 @@ confirmed; confirm with AuScope (also recorded in ADR-023).
 - **Homepage hero photos**: repository-specific homepage content (0.9 MB and 1.3 MB)
   with unknown photo credit.
 
-## CSS provenance
+## CSS and JavaScript provenance
 
-The CSS in `assets/css/` is newly written for this package. Only colour values and
-design conventions were taken from the reference `shared_style.css`; no rules were
-copied.
+Everything under `assets/` (the CSS in `assets/css/`, the placeholder
+`assets/js/auscope_core.js` and `assets/webassets.yml`) is newly written for this
+package. Only colour values and design conventions were taken from the reference
+`shared_style.css`; no rules or code were copied.
