@@ -3,10 +3,10 @@ Shared CKAN extension providing AuScope branding, themes, reusable UI components
 
 ## Status
 
-Extension skeleton ([Issue #1](https://github.com/AuScope/ckanext-auscope-core/issues/1)).
-The plugin loads and registers its template, public and Webassets directories, but
-does not change the CKAN UI yet. Shared styling, branding and UI components are
-tracked in separate issues.
+Shared styling and branding ([Issue #2](https://github.com/AuScope/ckanext-auscope-core/issues/2)).
+Enabling the plugin applies the AuScope colours, typography, focus styles, logo and
+favicon on top of CKAN's own templates and CSS. The shared header, footer and page
+layout are [Issue #3](https://github.com/AuScope/ckanext-auscope-core/issues/3).
 
 Consumers: AuScope Data Repository, Sample Repository, Instrument Registry (PIDINST)
 and the RAiD Repository.
@@ -48,7 +48,92 @@ Install into the Python environment of an existing CKAN 2.12.1 instance:
 
 ## Configuration
 
-The extension has no configuration options yet.
+The extension adds no configuration options. It changes the defaults of two CKAN
+core options:
+
+- `ckan.site_logo`: if it is CKAN's default `/base/images/ckan-logo.png`, it becomes
+  `/auscope_core/images/auscope-logo.png`.
+- `ckan.favicon`: if it is CKAN's default `/base/images/ckan.ico`, it becomes
+  `/auscope_core/images/auscope-favicon.png`.
+
+Any other value is kept, including an empty `ckan.site_logo` (CKAN then shows the
+site title as text), values from `CKAN__SITE_LOGO` / `CKAN__FAVICON` and values set
+in the sysadmin config UI. CKAN-generated configs set the default paths explicitly,
+so the rule compares values rather than checking whether the key is set. To keep
+CKAN's logo, set any other path.
+
+## Theme and branding
+
+Webassets bundles (library `auscope_core`):
+
+| Bundle | Contents | Included by |
+|---|---|---|
+| `auscope_core/auscope_core-tokens` | `css/tokens.css`: `--auscope-*` design tokens | preloaded by `auscope_core-css` |
+| `auscope_core/auscope_core-css` | `css/base.css`, `css/components.css`, `css/branding.css` | `templates/base.html` |
+| `auscope_core/auscope_core-js` | placeholder for later shared modules | not included in pages |
+
+Order of the stylesheets in the rendered `<head>`:
+
+1. CKAN `main.css`.
+2. `auscope_core-tokens`.
+3. `auscope_core-css`.
+4. Consumer bundles included after `{{ super() }}` in the consumer's `base.html`
+   `styles` block.
+5. The `ckan.site_custom_css` inline `<style>`.
+
+List the consumer plugin **before** `auscope_core` in `ckan.plugins`, so the
+consumer's `base.html` `{% ckan_extends %}` extends the shared one.
+
+### Customising the theme
+
+- **Override tokens** (preferred). In the consumer's own CSS bundle:
+
+  ```css
+  :root {
+    --auscope-color-accent: #e87722;
+    --auscope-logo-height: 4rem;
+  }
+  ```
+
+  The full list is in `ckanext/auscope_core/assets/css/tokens.css`. When you change
+  a colour that has an `-rgb` companion (for example `--auscope-color-primary` and
+  `--auscope-color-primary-rgb`), change both.
+- **Sysadmin tweaks**: `ckan.site_custom_css`.
+- **Replace or opt out**: in the consumer's `base.html`, override the
+  `auscope_core_styles` block. Use
+  `{% block auscope_core_styles %}{% asset 'auscope_core/auscope_core-tokens' %}{% endblock %}`
+  to keep only the tokens, or leave the block empty to drop the shared styles.
+- **Logo and favicon**: set `ckan.site_logo` / `ckan.favicon` (or
+  `CKAN__SITE_LOGO` / `CKAN__FAVICON`), for example to
+  `/auscope_core/images/auscope-logo-icon.png`. Set `ckan.site_logo =` (empty) to
+  show the text title.
+
+Shipped images are served from `/auscope_core/images/`: `auscope-logo.png`,
+`auscope-logo-reversed.png` (for dark backgrounds), `auscope-logo-icon.png` and
+`auscope-favicon.png`. Licensing and attribution are in
+`ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`. The Calibre font is
+not shipped (no redistribution licence); the base font is a system font stack.
+
+### Visual check
+
+With the development stack running:
+
+1. Open http://localhost:5000/, `/dataset`, `/user/login` and `/about`. Expect a
+   white masthead with the AuScope logo and a teal line under it, a light grey page
+   background, and a royal-blue footer with white text.
+2. Press Tab to see focus rings and the skip link. In the homepage search box and
+   on "Popular tags" the outline is white on blue; on the search submit button it
+   is blue, inside the button.
+3. On a dataset page, Tab through the Dataset / Groups / Activity tabs and confirm
+   the outline is visible.
+4. Narrow the window below 992 px and 576 px. At 375 px, Tab to the menu toggler
+   (outline visible), open it, and tap a nav link (text stays dark on white).
+5. Open a dataset whose notes contain a link and check that the link is underlined.
+   To create one, log in as a sysadmin and add a dataset with
+   `See [AuScope](https://www.auscope.org.au).` in its description.
+6. In DevTools, set a token on `:root` (for example `--auscope-color-primary: #8b0000`
+   with `--auscope-color-primary-rgb: 139, 0, 0`) and watch the page update.
+7. Set `CKAN__SITE_LOGO` in `.env` and restart `ckan-dev` to see the logo override.
 
 ## Development environment
 
@@ -110,7 +195,7 @@ ruff check .
 ```
 ckanext-auscope-core/
 ├── AGENTS.md                    # AI development instructions (canonical rules)
-├── docs/                        # architecture.md, decisions.md (ADR log)
+├── docs/                        # architecture.md, decisions.md (ADR log), branding-analysis.md
 ├── .kiro/steering/              # Kiro steering files (point to AGENTS.md and docs/)
 ├── .github/workflows/test.yml   # CI: tests in ckan/ckan-dev:2.12.1, ruff lint
 ├── docker-compose.yml           # Development stack: CKAN, PostgreSQL, Solr, Redis
@@ -126,10 +211,16 @@ ckanext-auscope-core/
 ├── test.ini                     # pytest configuration inheriting CKAN's test-core.ini
 └── ckanext/
     └── auscope_core/
-        ├── plugin.py            # AuscopeCorePlugin (IConfigurer)
-        ├── templates/           # Shared Jinja templates (empty for now)
-        ├── public/              # Static files served as-is (empty for now)
-        ├── assets/              # Webassets library "auscope_core" (webassets.yml)
+        ├── plugin.py            # AuscopeCorePlugin (IConfigurer, logo/favicon defaults)
+        ├── templates/
+        │   └── base.html        # Only core override: includes the shared CSS
+        ├── public/auscope_core/
+        │   ├── images/          # AuScope logos and favicon
+        │   └── ASSETS-LICENSES.md
+        ├── assets/              # Webassets library "auscope_core"
+        │   ├── webassets.yml
+        │   ├── css/             # tokens.css, base.css, components.css, branding.css
+        │   └── js/              # auscope_core.js (placeholder)
         ├── i18n/                # Translations (empty for now)
         └── tests/               # pytest tests
 ```
@@ -139,3 +230,5 @@ ckanext-auscope-core/
 - [AGENTS.md](AGENTS.md): development rules for people and AI agents
 - [docs/architecture.md](docs/architecture.md): extension design
 - [docs/decisions.md](docs/decisions.md): technical decisions and verification records
+- [docs/branding-analysis.md](docs/branding-analysis.md): analysis of the reference
+  repositories' branding (Issue #2)

@@ -72,7 +72,7 @@ Interfaces used now:
 
 | Interface | Purpose |
 |---|---|
-| `IConfigurer.update_config` | `add_template_directory("templates")`, `add_public_directory("public")`, `add_resource("assets", "auscope_core")` |
+| `IConfigurer.update_config` | `add_template_directory("templates")`, `add_public_directory("public")`, `add_resource("assets", "auscope_core")`; replaces `ckan.site_logo` / `ckan.favicon` with the AuScope files only when they equal CKAN's defaults (ADR-022) |
 
 Interfaces that may be added later, only for needs shared by all consumers:
 `ITemplateHelpers` (shared helpers), `IBlueprint` (shared pages),
@@ -97,20 +97,61 @@ ckan.plugins = <repository_theme> auscope_core <other plugins> envvars
 - Put reusable shared snippets under `templates/snippets/auscope_core/` so their
   names cannot clash with core or consumer snippets.
 - Keep core template overrides few; each one adds upgrade work.
+- `templates/base.html` is currently the only core override (see "Styling
+  architecture").
 
 ## Static files and Webassets
 
 - `public/` is served at the site root (registered in CKAN's
-  `plugin_public_paths`).
+  `plugin_public_paths`). Shared files live under `public/auscope_core/`, so they
+  are served at `/auscope_core/...` and cannot clash with consumers' `/base/...`
+  files (ADR-025).
 - `assets/` is the Webassets library `auscope_core`. Bundles defined in
   `assets/webassets.yml` are referenced as `auscope_core/<bundle>`, for example
   `{% asset 'auscope_core/auscope_core-css' %}`.
-- The current `auscope_core-css` and `auscope_core-js` bundles are placeholders.
-  No template includes them yet, so the UI is unchanged.
+
+## Styling architecture
+
+The theme is plain CSS layered over CKAN 2.12.1's unmodified `main.css`
+(Bootstrap 5). There is no Sass or Node build step (ADR-020).
+
+| Layer | File | Role |
+|---|---|---|
+| Design tokens | `assets/css/tokens.css` | `--auscope-*` custom properties on `:root`: palette (with `-rgb` triplets), semantic colours, typography, focus ring, component values. The public customisation API. |
+| Bootstrap mapping | `assets/css/base.css` | Assigns tokens to the `--bs-*` variables CKAN reads (`:root, [data-bs-theme=light]`); prose-link underlines; `:focus-visible` outlines; skip link; `prefers-reduced-motion`. |
+| Components | `assets/css/components.css` | `--bs-btn-*`, `--bs-nav-pills-*`, `--bs-pagination-*` for primary buttons, pills and pagination; checked and focused form controls. |
+| Branding | `assets/css/branding.css` | Targeted rules for CKAN components with hard-coded colours: page surface, masthead, logo size, masthead nav states, toggler, account bar, footer, homepage search. |
+
+Bundles: `auscope_core-tokens` (tokens only) and `auscope_core-css` (base,
+components, branding, with `extra.preload: [auscope_core/auscope_core-tokens]`).
+CKAN's `include_asset` emits preloaded bundles first and only once.
+`auscope_core-js` is registered but not included (ADR-021).
+
+Inclusion: `templates/base.html` extends core with `{% ckan_extends %}` and, in
+`{% block styles %}`, renders `{{ super() }}` (core `main.css`) followed by the
+named block `auscope_core_styles`, which includes `auscope_core-css`. Load order is
+therefore core `main.css`, tokens, shared CSS, consumer bundles, then
+`ckan.site_custom_css`. Equal-specificity rules in the shared CSS win over core by
+order; selectors that compete with more specific CKAN rules state their specificity
+in comments.
+
+Rules that keep the theme accessible (ADR-024): brand values only in
+`tokens.css`; prose links underlined; focus outlines never removed, with one
+`:focus-visible` selector per CKAN `outline: 0` rule on a rendered component;
+dark containers (`.site-footer`, `.homepage .module-search`) set
+`--auscope-focus-ring-color` and `--bs-heading-color` to explicit `var(...)` values;
+teal is decorative only. `tests/test_theme_css.py` checks token contrast (WCAG AA)
+and these rules statically.
+
+Consumers customise by overriding tokens in a later-loaded bundle, by
+`ckan.site_custom_css`, by overriding `auscope_core_styles`, or through
+`ckan.site_logo` / `ckan.favicon` (README "Theme and branding"). Brand assets and
+their licences are listed in `public/auscope_core/ASSETS-LICENSES.md`.
 
 ## Configuration
 
-No configuration options yet. Future options must be declared through CKAN's config
+No configuration options of its own; the plugin only changes the defaults of
+`ckan.site_logo` and `ckan.favicon` (see Plugin). Future options must be declared through CKAN's config
 declaration (`IConfigDeclaration`) with the `ckanext.auscope_core.` prefix.
 
 ## Out of scope
@@ -144,9 +185,13 @@ to the development services. Test commands therefore run through
 `solr-test`, Redis database 2) and refuses to run if any of them is missing or
 equals its development value (ADR-019). Tests check the entry point, plugin
 loading, template and public directory registration, the Webassets definitions,
-`status_show` and home page rendering. CI rewrites the hostname to its own
-test-only `solr` service, installs the built package non-editably, verifies its
-entry point and packaged runtime directories, runs the installed suite in
+`status_show` and home page rendering (`test_plugin.py`). `test_theme.py` checks
+bundle registration, the rendered stylesheet order, that the CSS and images are
+served, and the logo and favicon default rule. `test_theme_css.py` is pure Python:
+token definitions, contrast pairs, `-rgb` triplets, dark-surface and focus rules,
+and licence entries for every image. CI rewrites the hostname to its own test-only
+`solr` service, installs the built package non-editably, verifies its entry point
+and packaged runtime directories, runs the installed suite in
 `ckan/ckan-dev:2.12.1`, and lints with ruff.
 
 Only CKAN 2.12.1 has been exercised so far. Issue #5 contains the planned

@@ -59,6 +59,29 @@ Never copy credentials or `.env` values from these repositories.
 - Record important technical decisions and their rationale.
 - Do not invent successful test results or claim compatibility without verification.
 
+## Styling rules
+
+- Brand values (colours, fonts, sizes) live only in
+  `ckanext/auscope_core/assets/css/tokens.css` as `--auscope-*` tokens. Other CSS
+  files only reference tokens. Product-specific styles stay in consumer extensions.
+- Dark-surface rule: any container given a primary or primary-hover background must
+  also set `--auscope-focus-ring-color` and `--bs-heading-color` explicitly to the
+  on-primary (or footer) colour, for example
+  `--auscope-focus-ring-color: var(--auscope-color-on-primary)` and
+  `--bs-heading-color: var(--auscope-color-on-primary)`. Do not use `inherit`: on a
+  custom property it inherits the parent's value of that property, which is royal
+  blue.
+- Never remove focus outlines. When CKAN adds an `outline: 0` rule for a rendered
+  component, add a matching `:focus-visible` selector (same specificity) to the
+  focus list in `base.css`.
+- Keep the `TEXT_PAIRS` / `NON_TEXT_PAIRS` contrast tests passing; teal is decorative
+  only, never text or the only state indicator.
+- Every new brand asset needs an entry in
+  `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`. Do not ship fonts
+  or images without a known redistribution licence.
+- Keep the shared CSS free of `url()` references and of `!important` (except in the
+  reduced-motion block).
+
 ## Working rules
 
 - Work on a feature branch named `feature/<issue-number>-<short-slug>`, one GitHub
@@ -98,6 +121,11 @@ Run from the repository root. See README.md for details.
 | Architecture and extension design | `docs/architecture.md` |
 | Decisions, rationale and verification records | `docs/decisions.md` |
 | Kiro steering (product, tech, structure) | `.kiro/steering/*.md` |
+| Theme tokens (customisation API) | `ckanext/auscope_core/assets/css/tokens.css` |
+| Styling architecture and load order | `docs/architecture.md` ("Styling architecture") |
+| Theme customisation and visual check | `README.md` ("Theme and branding") |
+| Asset licences and attribution | `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md` |
+| Reference-repository branding analysis | `docs/branding-analysis.md` |
 
 ## Definition of done
 

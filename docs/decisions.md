@@ -80,7 +80,9 @@ Checked on 2026-11-02 while setting up Issue #1.
 
 ## ADR-007: Minimal plugin
 
-- Date: 2026-11-02. Status: Accepted.
+- Date: 2026-11-02. Status: Partly superseded by ADR-021 (templates). The
+  empty-directory wheel gap is fixed for `templates/` and `public/`, which now hold
+  real files; `i18n/` still holds only `.gitkeep`.
 - Context: Issue #1 is the skeleton only; styling, branding and UI are separate
   issues.
 - Decision: implement only `IConfigurer`. No template overrides, helpers or
@@ -92,7 +94,7 @@ Checked on 2026-11-02 while setting up Issue #1.
 
 ## ADR-008: Placeholder Webassets bundles
 
-- Date: 2026-11-02. Status: Accepted.
+- Date: 2026-11-02. Status: Superseded by ADR-021.
 - Decision: `assets/webassets.yml` defines `auscope_core-css` and `auscope_core-js`,
   each pointing to a comment-only file. No template includes them.
 - Consequences: establishes the bundle naming convention (`auscope_core/<bundle>`)
@@ -347,3 +349,144 @@ development database again. CI was not re-run for this change.
   `CKANConfig` annotation and `webassets.yml` need no compatibility branches. The
   package's Python >=3.10 requirement excludes older Python environments otherwise
   accepted by CKAN 2.10.1 and 2.11.4. CKAN 2.11.4 and 2.10.1 are not yet verified.
+
+## ADR-020: Plain CSS design tokens layered over CKAN `main.css`
+
+- Date: 2026-11-03. Status: Accepted.
+- Context: the reference repositories ship a 23 KB legacy `shared_style.css` that
+  redefines Bootstrap variables (`--bs-teal`, `--bs-gray`, `--bs-red`) with new
+  meanings. CKAN 2.12.1's Bootstrap 5 build reads `--bs-*` variables at runtime.
+- Decision: no Sass rebuild and no `ckan.theme` replacement. Brand values are
+  `--auscope-*` custom properties on `:root` in `tokens.css` (with `-rgb` triplets
+  where Bootstrap needs them). `base.css` assigns them to the `--bs-*` variables of
+  the same meaning; `components.css` and `branding.css` cover components with
+  Bootstrap variables or hard-coded CKAN colours. No `url()` in the CSS, so no
+  `cssrewrite` filter is needed.
+- Consequences: no build toolchain; CKAN upgrades only need the targeted selectors
+  re-checked. Consumers that change a colour must also change its `-rgb` companion.
+  Some CKAN colours not covered (for example `.btn-default`, the activity stream)
+  stay CKAN teal until a consumer needs them.
+
+## ADR-021: Bundles and `base.html` inclusion
+
+- Date: 2026-11-03. Status: Accepted. Supersedes ADR-008; partly supersedes ADR-007
+  (templates).
+- Decision: bundles `auscope_core-tokens` (tokens only) and `auscope_core-css`
+  (base, components, branding; `extra.preload: [auscope_core/auscope_core-tokens]`).
+  `auscope_core-js` stays registered as a placeholder and is not included. One core
+  override, `templates/base.html`, renders `{{ super() }}` in `{% block styles %}`
+  and then the named block `auscope_core_styles` with the `auscope_core-css` asset.
+- Consequences: shared CSS loads after `main.css`, tokens are emitted once and first,
+  and consumers can replace, reduce to tokens only, or drop the shared styles from
+  their own `base.html` without a config option. The integration test on the
+  rendered link order catches a renamed core `styles` block.
+
+## ADR-022: Logo and favicon defaults only when CKAN defaults are in effect
+
+- Date: 2026-11-03. Status: Accepted.
+- Context: CKAN fills in config defaults before plugins' `update_config` runs, and
+  CKAN-generated configs (including the dev `/srv/app/ckan.ini`) set
+  `ckan.site_logo = /base/images/ckan-logo.png` and
+  `ckan.favicon = /base/images/ckan.ico` explicitly.
+- Decision: `update_config` replaces `ckan.site_logo` / `ckan.favicon` with
+  `/auscope_core/images/auscope-logo.png` / `auscope-favicon.png` only when the value
+  equals CKAN's default. Values are compared rather than checking whether the key is
+  set. Any other value, including an empty string, is kept.
+- Consequences: `IConfigurer` runs in reverse plugin order, so `envvars` (listed last)
+  applies `CKAN__SITE_LOGO` / `CKAN__FAVICON` first and the rule leaves them alone;
+  sysadmin values from `system_info` are applied later and also win. To keep CKAN's
+  logo, set any other path. The rule is idempotent.
+
+## ADR-023: Brand assets included and excluded
+
+- Date: 2026-11-03. Status: Accepted (licensing assumption open).
+- Decision: include the AuScope logo, reversed logo and icon (copied unmodified from
+  PIDINST, renamed to kebab-case) and a 64×64 favicon derived from the icon. Exclude
+  the Calibre fonts (commercial Klim typeface, no redistribution licence found; a
+  system font stack is used instead), the NCRIS logos (footer, Issue #3) and the
+  homepage hero photos (large content images with unknown credit).
+- Assumption: AuScope has authorised use of its logos in this public package. Not yet
+  confirmed; confirm with AuScope.
+- CSS provenance: the CSS in `assets/css/` is newly written for this package. Only
+  colour values and design conventions were taken from the reference
+  `shared_style.css`; no rules were copied.
+- Consequences: details and checksums are in
+  `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`; a test fails if an
+  image has no entry there.
+
+## ADR-024: Accessibility deviations from the legacy CSS
+
+- Date: 2026-11-03. Status: Accepted.
+- Decision:
+  - Focus outlines are restored. `base.css` has one `:focus-visible` selector per
+    CKAN 2.12.1 `outline: 0` rule on a rendered component (including
+    `.page-header .nav-tabs li a`, `.navbar-toggler`, `.accordion-button`,
+    `.btn-close`), at equal specificity.
+  - Prose links are underlined (royal blue on body text is 1.24:1, WCAG 1.4.1). The
+    selector is anchored on `.main` (rendered by `page.html` on every page) with
+    `:is(p, dd, blockquote, td)` plus `.main .notes li a` and `.site-footer a`. Bare
+    `li a` is excluded because facet, nav and action lists are standalone links.
+  - The active-nav indicator is royal blue; teal (2.16:1 on white) is decorative only.
+  - Danger, success, warning and info keep Bootstrap semantics; the legacy
+    white-on-tangerine and white-on-red combinations are not reproduced.
+  - Body font size is `1rem`, up from CKAN 2.12.1's `0.875rem`, for readability
+    (close to the legacy `1.063rem`, without its forced-size selector list).
+  - Dark-surface rule: containers with a primary or primary-hover background set
+    `--auscope-focus-ring-color` and `--bs-heading-color` to explicit `var(...)`
+    values, never `inherit` (which would give royal blue on royal blue).
+- Consequences: `test_theme_css.py` checks token contrast (≥ 4.5 text, ≥ 3.0
+  non-text) and these rules statically. Body text is 14 % larger on every CKAN page.
+
+## ADR-025: `/auscope_core/` public namespace
+
+- Date: 2026-11-03. Status: Accepted.
+- Decision: shared static files live in `public/auscope_core/` and are served at
+  `/auscope_core/...`, with kebab-case names (no spaces or en dashes).
+- Consequences: no clash with consumers' existing `/base/images/AuScope Logo*.png`
+  files while they migrate.
+
+## ADR-026: Issue #2 branch base
+
+- Date: 2026-11-03. Status: Accepted.
+- Context: the Issue #1 and Issue #5 work is not on `origin/main`, which holds only
+  the initial commit.
+- Decision: `feature/2-shared-branding` is branched from
+  `feature/5-ckan-compatibility` (`c2fd19c`).
+- Consequences: merge in the order Issue #1 → #5 → #2, or rebase this branch onto
+  `main` after those branches have merged.
+
+---
+
+## Verification record: Issue #2 (2026-11-03)
+
+Environment: Windows host, Python 3.12.5, Podman 6.0.2; `ckan-dev` runs CKAN 2.12.1
+on Python 3.14.10 (pytest 9.1.1). Browser: Microsoft Edge (headless, via Playwright
+1.64.1 for Python with `channel="msedge"`).
+
+| Check | Result |
+|---|---|
+| `ruff check .` (ruff 0.17.3) | `All checks passed!` |
+| `pytest --ckan-ini=test.ini -p no:cacheprovider -v ckanext/auscope_core` | `56 passed` (7 in `test_plugin.py`, 14 in `test_theme.py`, 35 in `test_theme_css.py`) |
+| Contrast test mutation: `--auscope-color-royal-blue: #59c2aa` | 9 failed (8 contrast pairs and the `-rgb` triplet test); reverted |
+| Dark-surface test mutation: footer `--bs-heading-color: inherit` | the `.site-footer` dark-surface test failed; reverted |
+| Favicon (Pillow 12.3.0 in `ckan-dev`) | `(64, 64) RGBA`; copied logos match the source MD5s |
+| `pip wheel --no-deps` (clean `build/`) and listing | contains `webassets.yml`, the 4 CSS files, `js/auscope_core.js`, `templates/base.html`, the 4 PNGs and `ASSETS-LICENSES.md`; no `auscope_core.css` and no `.gitkeep` under `templates/` or `public/` (`i18n/.gitkeep` remains). No font files (excluded, ADR-023) |
+| Wheel installed into a clean venv | entry point `ckanext.auscope_core.plugin:AuscopeCorePlugin`; CSS, PNGs, licence file and `templates/base.html` present in site-packages |
+| Dev stack pages `/`, `/dataset`, `/dataset/auscope-branding-check`, `/user/login`, `/about` | all 200; all 20 same-origin CSS/JS/image URLs they reference return 200 (`/auscope_core/images/auscope-logo.png` and `auscope-favicon.png` as `image/png`) |
+| Rendered `<head>` | `main.css` < `auscope_core-tokens.css` < `auscope_core.css`; logo `src` and favicon `href` point at `/auscope_core/images/` |
+| `podman compose logs --since 30m ckan-dev` searched for `unknown asset`, `Traceback`, ` 404 `, ` 500 ` | no asset or page errors. 404s only from the seed script's expected `organization_show` / `package_show` existence checks. One `PermissionError` traceback from the image start script writing `/srv/app/src/ckan/test-core.ini` on container restart; not caused by this extension |
+| Headless Edge, 1280×900 and 375×800, home, `/dataset` and the demo dataset (33 checks) | all passed: masthead background equals `--auscope-masthead-bg` (white); logo 48 px / 36 px tall; footer `rgb(40, 37, 114)` with white text; "Search data" and "Popular tags" white; homepage search input and popular-tag focus outlines white, submit button outline royal blue at −3 px offset; Dataset tab focus outline 3 px solid royal blue; 375 px toggler focus outline 3 px solid; notes links underlined; no horizontal overflow added by the theme. 0 console errors, 0 page errors, 0 responses ≥ 400 |
+| Screenshots (viewed) | light masthead with teal line and AuScope logo, light grey surface, white readable headings on the blue homepage search box, blue footer with white text, collapsed toggler at 375 px, `/dataset` at 375 px wraps without clipping |
+| Reference repositories | ckan-docker HEAD `2c10d5b0`, 8 porcelain entries; PIDINST HEAD `974efdfd`, 4 modified and 6 untracked: identical to the snapshot |
+
+Demo dataset: created in the dev database by a scratch script run inside `ckan-dev`.
+It creates a dev-only sysadmin with a random password, gets an API token inside the
+container, and calls `organization_create` and `package_create`
+(`auscope-branding-check`, notes with a Markdown paragraph link and a list-item
+link). The token is never printed or stored in the repository.
+
+Not verified: CKAN 2.11.4 and 2.10.1; browsers other than Edge (Chromium); a manual
+keyboard and screen-reader walkthrough by a person; the menu toggler opened and nav
+links tapped at 375 px; RTL rendering. CKAN 2.12.1 itself overflows a 375 px
+viewport by 6 px (`.row` negative margins in the page and footer); this exists with
+the AuScope stylesheets removed and is not changed by this issue.
