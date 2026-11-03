@@ -133,13 +133,14 @@ Checked on 2026-11-02 while setting up Issue #1.
 
 ## ADR-012: CI workflow
 
-- Date: 2026-11-02. Status: Accepted (unverified).
+- Date: 2026-11-02. Status: Accepted (verified 2026-11-03).
 - Decision: `.github/workflows/test.yml` adapted from the cookiecutter: tests in
   `ckan/ckan-dev:2.12.1` with `options: --user root` (the image user `ckan` cannot
   `pip install`), services `ckan-solr:2.12-solr9`, `ckan-postgres-dev:2.12`,
   `redis:7`; lint with `astral-sh/ruff-action@v3` pinned to ruff 0.17.3.
-- Consequences: the workflow has not run on GitHub because nothing has been pushed.
-  The YAML parses locally and the same test commands pass in the dev container.
+- Consequences: the YAML parses locally and the same test commands pass in the dev
+  container. GitHub Actions run 41433780892 passed both `lint` and `test`, including
+  non-editable installation verification, on PR #7.
 
 ## ADR-013: AI documentation layout
 
@@ -161,7 +162,8 @@ Checked on 2026-11-02 while setting up Issue #1.
 - Dev and test runs use physically separate Solr services and named volumes.
 - The PIDINST reference repository was only partly inspected (its compose file
   could not be read).
-- CI is unverified (ADR-012). Only Python 3.14 and 3.12 were exercised (ADR-003).
+- CI is verified on GitHub Actions (ADR-012). Only Python 3.14 and 3.12 were
+  exercised (ADR-003).
 
 ---
 
@@ -247,5 +249,4 @@ Environment: Windows host, Podman 6.0.2, CKAN development image Python 3.14.10.
 | PostgreSQL init with special-character test password | Role and both databases created; quote, dollar sign, space and backslash handled without exposing the value |
 | `ckan -c test.ini db init` | `Upgrading DB: SUCCESS` |
 | Installed-package pytest (`--pyargs ckanext.auscope_core`) | `7 passed, 15 warnings in 6.03s` |
-
-The GitHub Actions run is recorded separately after the feature branch is pushed.
+| GitHub Actions run 41433780892 on PR #7 | `lint`: success; `test`: success, including non-editable installation verification |
