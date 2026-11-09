@@ -101,9 +101,9 @@ pytest runs inside the `ckan-dev` container with CKAN core's pytest plugin.
 to the development services. Test commands therefore run through
 `docker/ckan/test-env.sh`, which swaps in the `TEST_CKAN_*` values (`ckan_test`,
 `solr-test`, Redis database 2) and refuses to run if any of them is missing or
-equals its development value (ADR-019). Tests check the entry point, plugin loading, template and
-public directory registration, the Webassets definitions, `status_show` and home
-page rendering. CI rewrites the hostname to its own test-only `solr` service,
-installs the built package non-editably, verifies its entry point and packaged
-runtime directories, runs the installed suite in `ckan/ckan-dev:2.12.1`, and lints
-with ruff.
+equals its development value (ADR-019). Tests check the entry point, plugin
+loading, template and public directory registration, the Webassets definitions,
+`status_show` and home page rendering. CI rewrites the hostname to its own
+test-only `solr` service, installs the built package non-editably, verifies its
+entry point and packaged runtime directories, runs the installed suite in
+`ckan/ckan-dev:2.12.1`, and lints with ruff.
