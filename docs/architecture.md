@@ -95,10 +95,13 @@ reserved characters in passwords.
 ## Testing
 
 pytest runs inside the `ckan-dev` container with CKAN core's pytest plugin.
-`test.ini` inherits CKAN's `test-core.ini`, whose `TEST_CKAN_*` values the image
-fills in at start-up. It explicitly overrides `solr_url` with the `solr-test`
-service because commands that bypass the image start script do not rewrite CKAN's
-core test configuration. Tests check the entry point, plugin loading, template and
+`test.ini` inherits CKAN's `test-core.ini` and overrides `solr_url` with the
+`solr-test` service. CKAN applies the `CKAN_SQLALCHEMY_URL`, `CKAN_SOLR_URL` and
+`CKAN_REDIS_URL` environment variables over both files, and the container sets them
+to the development services. Test commands therefore run through
+`docker/ckan/test-env.sh`, which swaps in the `TEST_CKAN_*` values (`ckan_test`,
+`solr-test`, Redis database 2) and refuses to run if any of them is missing or
+equals its development value (ADR-019). Tests check the entry point, plugin loading, template and
 public directory registration, the Webassets definitions, `status_show` and home
 page rendering. CI rewrites the hostname to its own test-only `solr` service,
 installs the built package non-editably, verifies its entry point and packaged

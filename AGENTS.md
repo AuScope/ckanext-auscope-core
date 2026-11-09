@@ -49,6 +49,9 @@ Never copy credentials or `.env` values from these repositories.
   placeholders only.
 - Keep automated tests pointed at the dedicated `solr-test` service. Never run CKAN
   test fixtures against the development `solr` service or its volume.
+- Tests must use the `ckan_test` database, never `ckan_default`. In Compose, run
+  every test and test-DB command through `sh docker/ckan/test-env.sh`, because the
+  container's `CKAN_*` connection variables override `test.ini`.
 - Work autonomously. Ask only when blocked by missing credentials, an irreversible or
   high-risk action, or an architectural decision with significant consequences.
 - Record assumptions and decisions in `docs/decisions.md`.
@@ -62,8 +65,8 @@ Run from the repository root. See README.md for details.
 | Lint | `ruff check .` (version pinned in `dev-requirements.txt`) |
 | Build wheel | `pip wheel --no-deps -w dist .` |
 | Start dev stack | `cp .env.example .env` then `docker compose up -d --build` (or `podman compose`) |
-| Init test DB | `docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev ckan -c test.ini db init` |
-| Run tests | `docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev pytest --ckan-ini=test.ini -v ckanext/auscope_core` |
+| Init test DB | `docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev sh docker/ckan/test-env.sh ckan -c test.ini db init` |
+| Run tests | `docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev sh docker/ckan/test-env.sh pytest --ckan-ini=test.ini -v ckanext/auscope_core` |
 | Check plugin loaded | `GET http://localhost:5000/api/3/action/status_show` lists `auscope_core` |
 | Stop dev stack | `docker compose down` |
 

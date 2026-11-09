@@ -79,16 +79,24 @@ Solr and file-storage volumes).
 With the stack running:
 
 ```bash
-docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev ckan -c test.ini db init
-docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev pytest --ckan-ini=test.ini -v ckanext/auscope_core
+docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev sh docker/ckan/test-env.sh ckan -c test.ini db init
+docker compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev sh docker/ckan/test-env.sh pytest --ckan-ini=test.ini -v ckanext/auscope_core
 ```
+
+Always run tests through `docker/ckan/test-env.sh`. The `ckan-dev` container sets
+`CKAN_SQLALCHEMY_URL`, `CKAN_SOLR_URL` and `CKAN_REDIS_URL` to the development
+services, and CKAN applies these variables over `test.ini`. Without the script,
+`clean_db` empties the development database. The script replaces them with the
+`TEST_CKAN_*` values from `.env` (`ckan_test`, `solr-test`, Redis database 2) and
+refuses to run if a test value is missing or equals the development value. If an
+older `.env` sets `TEST_CKAN_SOLR_URL` to the `solr` service, copy the current value
+from `.env.example`.
 
 Tests use CKAN core's pytest plugin and fixtures. `test.ini` inherits
 `../../src/ckan/test-core.ini`, which resolves inside the `ckan-dev` container. For a
 CKAN source install, change the `use = config:` line to point at your CKAN source's
-`test-core.ini` and set `solr_url` to a test-only Solr core. In Compose, both
-`test.ini` and `TEST_CKAN_SOLR_URL` point at the dedicated `solr-test` service; do
-not point either at the development `solr` service.
+`test-core.ini`, set `solr_url` to a test-only Solr core, and make sure the
+`CKAN_*` connection variables are unset or point at test services.
 
 ## Linting
 
@@ -108,6 +116,7 @@ ckanext-auscope-core/
 ├── docker-compose.yml           # Development stack: CKAN, PostgreSQL, Solr, Redis
 ├── docker/
 │   ├── ckan/Dockerfile.dev      # ckan-dev image with the extension installed editable
+│   ├── ckan/test-env.sh         # Points CKAN at the test DB, Solr and Redis for tests
 │   └── postgres/initdb/         # Creates the CKAN role and dev/test databases
 ├── .env.example                 # Template for the local .env (never commit .env)
 ├── pyproject.toml               # Package metadata, ckan.plugins entry point, tool config

@@ -210,6 +210,8 @@ into a non-Docker CKAN source install; `docker` (as opposed to Podman) runs.
   service.
 - Consequences: the local stack runs a second Solr container, trading some memory
   and disk use for hard isolation of development data.
+- Amended by ADR-019: inside Compose the `test.ini` override alone does not take
+  effect, because `CKAN_SOLR_URL` overrides it.
 
 ## ADR-017: Quote PostgreSQL init values through psql variables
 
@@ -250,3 +252,80 @@ Environment: Windows host, Podman 6.0.2, CKAN development image Python 3.14.10.
 | `ckan -c test.ini db init` | `Upgrading DB: SUCCESS` |
 | Installed-package pytest (`--pyargs ckanext.auscope_core`) | `7 passed, 15 warnings in 6.03s` |
 | GitHub Actions run 41433780892 on PR #7 | `lint`: success; `test`: success, including non-editable installation verification |
+
+---
+
+## ADR-019: Run tests through a test-connection wrapper
+
+- Date: 2026-11-09. Status: Accepted.
+- Assumption: no GitHub issue exists for this. It is an Issue #1 development
+  environment follow-up, so the branch is `feature/1-test-db-isolation`.
+- Context: running the documented pytest command in Compose emptied the
+  development database (`organization_list` returned `[]` after a run). Read in the
+  running `ckan/ckan-dev:2.12.1` container:
+  - `/srv/app/src/ckan/ckan/config/environment.py`, `CONFIG_FROM_ENV_VARS` (lines
+    81-100) maps `sqlalchemy.url`, `solr_url`, `ckan.redis.url` (and datastore,
+    site, storage and SMTP options) to `CKAN_*` variables. `update_config()`
+    (line 103) copies every non-empty variable into `config` before plugins load,
+    so the variables override every ini file. CKAN's own
+    `ckan/tests/config/test_environment.py` states that these take precedence over
+    the config file. `ckan/tests/pytest_ckan/ckan_setup.py` builds the test app
+    with `make_app`, which runs this code.
+  - `.env` sets `CKAN_SQLALCHEMY_URL` (`ckan_default`), `CKAN_SOLR_URL` (`solr`) and
+    `CKAN_REDIS_URL` (Redis db 1) in the container. Database, Solr and Redis were
+    all affected. ADR-016's `solr_url` in `test.ini` was overridden by
+    `CKAN_SOLR_URL`, so it never protected the development Solr core in Compose.
+  - `/srv/app/start_ckan_development.sh` (lines 29-36) tries to write the
+    `TEST_CKAN_*` values into `test-core.ini`, but in this image the file is owned
+    by `ckan-sys` with mode 644 and the script runs as `ckan`. The container log
+    shows `PermissionError: [Errno 13] Permission denied:
+    '/srv/app/src/ckan/test-core.ini'`, so `test-core.ini` keeps its `localhost`
+    defaults. Even when that write succeeds, the `CKAN_*` variables still win.
+- Options: (a) `-e CKAN_...=...` flags in the documented command: long, repeats the
+  database password in the docs and is easy to drop. (b) a separate Compose test
+  service: duplicates the `ckan-dev` definition and adds a second container
+  start-up for each run. (c) a small checked-in wrapper script.
+- Decision: (c). `docker/ckan/test-env.sh` (POSIX `sh`) exports
+  `CKAN_SQLALCHEMY_URL`, `CKAN_SOLR_URL` and `CKAN_REDIS_URL` from the matching
+  `TEST_*` variables, then `exec`s its arguments. It exits with an error if a test
+  value is unset or equals the development value. README and AGENTS.md run both
+  `ckan -c test.ini db init` and pytest through it. `test.ini` keeps its
+  `solr_url` override for source installs.
+- CI: unchanged. `.github/workflows/test.yml` sets the `CKAN_*` variables to its own
+  test-only services (`ckan_test`, a Solr service used only by tests, Redis db 1 in a
+  throwaway service), so the variables there already point at test data.
+- Consequences: the guard caught a real misconfiguration: the local `.env` (created
+  before ADR-016) still had `TEST_CKAN_SOLR_URL=http://solr:8983/solr/ckan`. Older
+  `.env` files must copy the current value from `.env.example`. `CKAN_SITE_URL` and
+  `CKAN_STORAGE_PATH` still override the test config; the current tests write no
+  files, so this was left unchanged.
+
+## Verification record: ADR-019 (2026-11-09)
+
+Environment: Windows host, Podman 6.0.2 with Docker Compose v2.39.2 as provider,
+`ckan/ckan-dev:2.12.1` (Python 3.14.10). Commands ran from the repository root with
+`podman compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev`
+(abbreviated `exec`). The probe script loaded `test.ini` with `load_config` and
+`make_app` and printed the effective database name, `solr_url` and
+`ckan.redis.url`.
+
+| Step | Command | Result |
+|---|---|---|
+| Start | `podman compose up -d --build` | All five services started; `status_show` returned `ckan_version: 2.12.1` with `auscope_core` |
+| Root cause | `exec python /tmp/probe_cfg.py` (no wrapper) | `db: ckan_default`, `solr: http://solr:8983/solr/ckan`, `redis: redis://redis:6379/1` |
+| Guard, stale `.env` | `exec sh docker/ckan/test-env.sh python /tmp/probe_cfg.py` | `test-env: TEST_CKAN_SOLR_URL equals CKAN_SOLR_URL; refusing to use development data`, exit 1 |
+| Guard, missing value | `exec env -u TEST_CKAN_REDIS_URL sh docker/ckan/test-env.sh true` | `test-env: TEST_CKAN_REDIS_URL is not set; see .env.example`, exit 1 |
+| Fix `.env` | Set local `TEST_CKAN_SOLR_URL=http://solr-test:8983/solr/ckan` (the `.env.example` value), `podman compose up -d ckan-dev` | Container recreated |
+| Wrapper | `exec sh docker/ckan/test-env.sh python /tmp/probe_cfg.py` | `db: ckan_test`, `solr: http://solr-test:8983/solr/ckan`, `redis: redis://redis:6379/2` |
+| Seed dev marker | `podman compose exec ckan-dev python /tmp/seed_marker.py seed` (`/srv/app/ckan.ini`, `organization_create` and `package_create`) | `db: ckan_default`; `orgs: ['isolation-marker-org', 'auscope-branding-check']`; `solr hits: 1` |
+| Dev Solr before | `curl "http://solr:8983/solr/ckan/select?q=*:*&rows=0"` | `"numFound":4` |
+| Test DB init | `exec sh docker/ckan/test-env.sh ckan -c test.ini db init` | `CKAN database version upgraded: base -> 9445ce34fc23 (head)`, `Upgrading DB: SUCCESS`. `ckan_test` had never been initialised, so earlier test runs used `ckan_default` |
+| Tests | `exec sh docker/ckan/test-env.sh pytest --ckan-ini=test.ini -p no:cacheprovider -v ckanext/auscope_core` | `7 passed in 9.56s` (2 tests use `clean_db`) |
+| Dev marker after | `podman compose exec ckan-dev python /tmp/seed_marker.py check` | `db: ckan_default`; `orgs: ['isolation-marker-org', 'auscope-branding-check']`; `solr hits: 1` |
+| Dev Solr after | same `curl` against `solr` | `"numFound":4` (unchanged) |
+| Test Solr after | same `curl` against `solr-test` | `"numFound":0` |
+| Lint | `ruff check .` (ruff 0.17.3) | `All checks passed!` |
+| Stop | `podman compose down` | Containers removed; volumes kept |
+
+The unwrapped pytest command was not re-run, because it would empty the
+development database again. CI was not re-run for this change.

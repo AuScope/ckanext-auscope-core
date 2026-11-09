@@ -8,7 +8,7 @@ ckanext/auscope_core/
 ├── assets/        # Webassets library "auscope_core" (webassets.yml, css/, js/)
 ├── i18n/          # Translation catalogues
 └── tests/         # pytest tests (test_<module>.py)
-docker/            # Dev image and PostgreSQL init script
+docker/            # Dev image, test-env.sh (test connection wrapper), PostgreSQL init
 docs/              # architecture.md, decisions.md
 ```
 
