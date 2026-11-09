@@ -53,6 +53,14 @@ PIDINST's fork). The three live sites render the same palette and surfaces.
 | Cards, composite fields, instrument cards, schema tables, stages | Legacy component CSS | Not provided | Deferred or repository-specific | Issue #4 / consumer |
 | Body background below the footer | `#d8d9d7` | CKAN white | Left: mapping `--bs-body-bg` would also recolour form inputs; the footer is the last element on CKAN pages | Issue #3 |
 
+## Customising the homepage search
+
+The homepage search form (`.homepage .module-search .search-form`, tokens
+`--auscope-home-search-bg` and `--auscope-home-search-color`) assumes a light
+background. Its heading and focus ring use the global royal blue. A consumer that
+makes it dark must also set `--bs-heading-color` and `--auscope-focus-ring-color` on
+that selector, per the dark-surface rule in `AGENTS.md`.
+
 ## Known limitations
 
 - CKAN's default footer shows a white "Powered by ckan" image that is faint on the

@@ -529,4 +529,32 @@ development database (the demo dataset, organisation and user were gone afterwar
 and had to be re-seeded before the browser check). The likely cause is that the
 container's `CKAN_SQLALCHEMY_URL` environment variable overrides `sqlalchemy.url`
 from `test.ini`. Not changed here; it needs its own fix, in the same way ADR-016
-isolated Solr.
+isolated Solr. Fixed on `feature/1-test-db-isolation` (`cc598a4`, its ADR-019:
+`docker/ckan/test-env.sh`); this branch does not contain that fix yet.
+
+## Verification record: Issue #2 final checks (2026-11-09)
+
+Branch `feature/2-shared-branding`, not rebased onto `feature/1-test-db-isolation`.
+Windows host, Python 3.12.5, Podman 6.0.2, CKAN 2.12.1 in `ckan-dev`, Playwright
+1.64.1 with headless Edge. Issue #2 acceptance criteria re-read from GitHub on
+2026-11-09.
+
+| Check | Result |
+|---|---|
+| `podman compose up -d`, then `GET /api/3/action/status_show` | `ckan_version` `2.12.1`; extensions `auscope_core`, `image_view`, `text_view`, `datatables_view`, `envvars` |
+| `ruff check .` (ruff 0.17.3) | `All checks passed!` |
+| `podman compose exec -w /srv/app/src_extensions/ckanext-auscope-core ckan-dev pytest --ckan-ini=test.ini -p no:cacheprovider -v ckanext/auscope_core` | `61 passed in 33.28s`; repeated with `-q`: `61 passed in 27.61s`, exit 0. Run before seeding because on this branch it empties the dev DB |
+| `sh .agents/tasks/seed_dataset.sh` in `ckan-dev` (scratch, not committed) | `user created`, `organization created`, `dataset created`, exit 0; the two `curl: (22) ... 404` lines are the expected existence checks |
+| `.agents/tasks/browser_check.py`, 1280×900 and 375×800, `/`, `/dataset`, `/dataset/auscope-branding-check`, `/user/login` | 58 of 58 checks passed, `all_ok: True`; 0 console errors, 0 page errors, 0 responses ≥ 400. Theme adds no horizontal overflow (375 px: 381 with and without the theme, the CKAN baseline) |
+| `python -m pip wheel --no-deps -w $env:TEMP\acore-wheel-final .` | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 26 entries, including `webassets.yml`, `base.css`, `branding.css`, `components.css`, `tokens.css`, `js/auscope_core.js`, `templates/base.html`, 4 PNGs under `public/auscope_core/images/` and `ASSETS-LICENSES.md` |
+| Reference repositories (`git rev-parse`, `git status --porcelain`) | ckan-docker HEAD `2c10d5b0`, 8 entries; PIDINST HEAD `974efdfd`, 10 entries: unchanged |
+| `podman compose down` | containers and network removed; volumes `ckan_storage`, `pg_data`, `solr_data`, `solr_test_data` kept |
+
+Acceptance criteria: branding works in CKAN (browser checks above); shared assets are
+packaged (wheel listing); styling is reusable (tokens in `tokens.css`, overrides
+documented in `README.md` and `docs/design-baseline.md`, 61 tests).
+
+Not verified: the wheel was not reinstalled into a clean venv in this run (done in
+the earlier records); CKAN 2.11.4 and 2.10.1; browsers other than Edge; a manual
+keyboard and screen-reader walkthrough. Logo redistribution permission from AuScope
+is still an assumption (ADR-023).
