@@ -1,0 +1,81 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      # The CKAN version tag of the Solr and Postgres containers should match
+      # the one of the container the tests run on.
+      image: ckan/ckan-dev:2.12.1
+      # The image runs as user "ckan", which cannot pip install packages.
+      options: --user root
+    services:
+      solr:
+        image: ckan/ckan-solr:2.12-solr9
+      postgres:
+        image: ckan/ckan-postgres-dev:2.12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+
+    env:
+      CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
+      CKAN_DATASTORE_WRITE_URL: postgresql://datastore_write:pass@postgres/datastore_test
+      CKAN_DATASTORE_READ_URL: postgresql://datastore_read:pass@postgres/datastore_test
+      CKAN_SOLR_URL: http://solr:8983/solr/ckan
+      CKAN_REDIS_URL: redis://redis:6379/1
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install requirements
+      run: |
+        pip install -r requirements.txt
+        pip install -r dev-requirements.txt
+        pip install .
+    - name: Verify non-editable installation
+      working-directory: /tmp
+      run: |
+        python - <<'PY'
+        from importlib.metadata import entry_points
+        from importlib.resources import files
+        from pathlib import Path
+        import os
+
+        (entry_point,) = entry_points(group="ckan.plugins", name="auscope_core")
+        entry_point.load()
+
+        package_root = files("ckanext.auscope_core")
+        for directory in ("assets", "i18n", "public", "templates"):
+            assert package_root.joinpath(directory).is_dir(), directory
+        assert package_root.joinpath("assets", "webassets.yml").is_file()
+
+        installed = Path(str(package_root)).resolve()
+        checkout = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+        assert not installed.is_relative_to(checkout), installed
+        PY
+    - name: Setup extension
+      run: |
+        # Replace default path to CKAN core config file with the one on the container
+        sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
+        # CI's Solr service is test-only; replace the local Compose service name.
+        sed -i -e 's|^solr_url = .*|solr_url = http://solr:8983/solr/ckan|' test.ini
+
+        ckan -c test.ini db init
+    - name: Run tests
+      working-directory: /tmp
+      run: >-
+        pytest --ckan-ini="$GITHUB_WORKSPACE/test.ini"
+        --cov=ckanext.auscope_core --disable-warnings
+        --pyargs ckanext.auscope_core
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.17.3"
