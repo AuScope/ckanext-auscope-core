@@ -179,6 +179,18 @@ def test_rgb_triplets_match_colours():
         assert triplet == _hex_to_rgb(_resolve(name, tokens)), name
 
 
+def test_established_type_tokens_and_external_calibre_contract():
+    tokens = _tokens()
+    assert tokens["--auscope-font-family-base"].startswith('"Calibre-light"')
+    assert tokens["--auscope-font-family-medium"].startswith('"Calibre-Medium"')
+    assert tokens["--auscope-font-size-base"] == "1.063rem"
+    assert tokens["--auscope-heading-1-size"] == "2rem"
+    assert tokens["--auscope-heading-2-size"] == "1.75rem"
+    assert tokens["--auscope-heading-3-size"] == "1.313rem"
+    assert not list(PUBLIC_DIR.rglob("*.woff"))
+    assert not list(PUBLIC_DIR.rglob("*.eot"))
+
+
 @pytest.mark.parametrize("name", CSS_FILES)
 def test_tokens_declared_only_on_root(name):
     for selector, body in rules(_css(name)):
@@ -219,7 +231,34 @@ def test_light_homepage_search_box_sets_its_text_colour():
     blocks = _blocks("branding.css", ".homepage .module-search .search-form")
     assert len(blocks) == 1
     assert blocks[0]["color"] == "var(--auscope-home-search-color)"
-    assert not _blocks("branding.css", ".homepage .module-search")
+    module_blocks = _blocks("branding.css", ".homepage .module-search")
+    assert all(
+        "color" not in block and "background" not in block
+        for block in module_blocks
+    )
+
+
+def test_body_uses_footer_background_below_short_pages():
+    blocks = _blocks("branding.css", "body")
+    assert len(blocks) == 1
+    assert blocks[0]["background-color"] == "var(--auscope-footer-bg)"
+
+
+def test_footer_labels_use_consumer_supplied_medium_family():
+    blocks = _blocks("branding.css", ".site-footer strong")
+    assert len(blocks) == 1
+    assert blocks[0]["font-family"] == "var(--auscope-font-family-medium)"
+    assert blocks[0]["letter-spacing"] == (
+        "var(--auscope-footer-strong-letter-spacing)"
+    )
+    assert "font-weight" not in blocks[0]
+
+
+def test_homepage_keeps_established_flat_card_treatment():
+    assert _blocks("branding.css", ".homepage .box")[0]["box-shadow"] == "none"
+    assert _blocks("branding.css", ".homepage .hero .box")[0]["border"] == "0"
+    accent = _blocks("branding.css", ".homepage .hero .module-promotion")[0]
+    assert "var(--auscope-home-promotion-accent-width)" in accent["border-block-start"]
 
 
 def test_homepage_search_button_has_inset_primary_ring():

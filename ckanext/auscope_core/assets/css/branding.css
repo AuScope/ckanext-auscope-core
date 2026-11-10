@@ -15,8 +15,15 @@
 /* Page surface (also drops CKAN's background images) */
 .main,
 .homepage .hero,
-.homepage .module-feeds {
+.homepage .module-feeds,
+.media-grid,
+.module-grid {
   background: var(--auscope-color-surface);
+}
+
+/* The footer colour continues below short pages instead of exposing white body. */
+body {
+  background-color: var(--auscope-footer-bg);
 }
 
 /* Masthead */
@@ -50,7 +57,7 @@
 .masthead .auscope-header-brand__title {
   color: var(--auscope-nav-active-color);
   font-size: var(--auscope-header-title-size);
-  font-weight: 500;
+  font-weight: var(--auscope-header-title-weight);
   line-height: 1.2;
 }
 
@@ -159,6 +166,8 @@
 .site-footer {
   background: var(--auscope-footer-bg);
   color: var(--auscope-footer-color);
+  margin-block-end: 0;
+  padding-block-end: 0;
   --auscope-focus-ring-color: var(--auscope-footer-color);
   --bs-heading-color: var(--auscope-footer-color);
 }
@@ -170,11 +179,17 @@
 .site-footer .auscope-footer__heading {
   color: var(--auscope-footer-color);
   font-size: var(--auscope-footer-heading-size);
-  font-weight: 400;
+  font-weight: var(--auscope-footer-heading-weight);
+  line-height: var(--auscope-heading-3-line-height);
 }
 
 .site-footer address {
   font-style: normal;
+}
+
+.site-footer strong {
+  font-family: var(--auscope-font-family-medium);
+  letter-spacing: var(--auscope-footer-strong-letter-spacing);
 }
 
 .site-footer a,
@@ -204,6 +219,31 @@
   color: var(--auscope-home-search-color);
 }
 
+/* Established flat homepage cards and decorative promotion accent. */
+.homepage .box {
+  box-shadow: none;
+}
+
+.homepage .hero .box {
+  border: 0;
+}
+
+.homepage .hero .module-promotion {
+  border-block-start: var(--auscope-home-promotion-accent-width) solid var(--auscope-color-accent);
+}
+
+.homepage .module-search {
+  padding: 0;
+}
+
+.homepage [role="main"] {
+  border-block-start: 0;
+}
+
+.homepage .module-search .search-form h3 {
+  color: var(--auscope-home-search-color);
+}
+
 /* Submit button inside the input: inset ring in primary */
 .homepage .module-search .search-input .btn {
   --auscope-focus-ring-color: var(--auscope-color-primary);
@@ -213,6 +253,19 @@
 /* Popular tags strip (dark surface) */
 .homepage .module-search .tags {
   background: var(--auscope-home-search-tags-bg);
+  --auscope-focus-ring-color: var(--auscope-color-on-primary);
+  --bs-heading-color: var(--auscope-color-on-primary);
+}
+
+.homepage .module-search .tags h3 {
+  color: var(--auscope-color-on-primary);
+  font-size: var(--auscope-font-size-base);
+}
+
+.homepage .media-overlay .media-heading {
+  background-color: var(--auscope-color-primary);
+  color: var(--auscope-color-on-primary);
+  font-size: var(--auscope-font-size-base);
   --auscope-focus-ring-color: var(--auscope-color-on-primary);
   --bs-heading-color: var(--auscope-color-on-primary);
 }

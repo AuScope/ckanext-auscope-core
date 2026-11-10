@@ -99,8 +99,9 @@ Other conventions in the legacy stylesheet:
 
 ## Reusable vs repository-specific
 
-**Reusable (moves into `auscope_core`)**: the palette, the typography base (font
-stack, size, heading colour), primary button and link colours, the light masthead
+**Reusable (implemented in `auscope_core`)**: the palette, the typography base
+(consumer-supplied Calibre family names with fallbacks, size and heading scale),
+primary button and link colours, the light masthead
 with royal-blue hover and active states, the page surface colour, logo sizing in the
 masthead, and the logos.
 
@@ -109,6 +110,11 @@ same surfaces everywhere: `#f2f2f1` masthead and content, `#d8d9d7` footer with
 royal-blue text, and a white homepage search box over a royal-blue keyword strip.
 The resulting baseline and the remaining differences are in
 [design-baseline.md](design-baseline.md).
+
+The final Issue #3 alignment also adopts the legacy flat homepage cards, black
+search heading, footer label face/letter spacing and grey `body` background. It
+does not adopt global link outline removal, low-contrast muted text, proprietary
+font files, obsolete EOT sources or product-specific PIDINST selectors.
 
 **Repository-specific (stays in each consumer)**: Leaflet, jsTree and DataTables
 vendor bundles; map, composite-field, ROR, GCMD and DOI JS modules; scheming form

@@ -34,9 +34,20 @@
   --auscope-color-border: var(--auscope-color-grey);
 
   /* Typography */
-  --auscope-font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-  --auscope-font-size-base: 1rem;
+  --auscope-font-family-base: "Calibre-light", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --auscope-font-family-medium: "Calibre-Medium", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --auscope-font-size-base: 1.063rem;
+  --auscope-font-weight-base: 400;
   --auscope-line-height-base: 1.5;
+  --auscope-heading-1-size: 2rem;
+  --auscope-heading-1-weight: 500;
+  --auscope-heading-2-size: 1.75rem;
+  --auscope-heading-2-weight: 400;
+  --auscope-heading-3-size: 1.313rem;
+  --auscope-heading-3-weight: 300;
+  --auscope-heading-line-height: 1.3;
+  --auscope-heading-3-line-height: 1.5;
+  --auscope-heading-adjacent-spacing: 0.9375rem;
 
   /* Focus */
   --auscope-focus-ring-color: var(--auscope-color-primary);
@@ -55,15 +66,19 @@
   --auscope-home-search-bg: var(--auscope-color-white);
   --auscope-home-search-color: var(--auscope-color-text);
   --auscope-home-search-tags-bg: var(--auscope-color-primary);
+  --auscope-home-promotion-accent-width: 0.25rem;
   --auscope-logo-height: 3.75rem;
   --auscope-logo-height-sm: 2.75rem;
   --auscope-header-brand-gap: 0.625rem;
   --auscope-header-title-size: 1.5rem;
   --auscope-header-title-size-sm: 1.125rem;
+  --auscope-header-title-weight: 700;
   --auscope-header-mobile-row-gap: 0.5rem;
   --auscope-header-nav-size: 1.2rem;
   --auscope-account-nav-size: 1rem;
   --auscope-footer-heading-size: 1.3125rem;
+  --auscope-footer-heading-weight: 300;
+  --auscope-footer-strong-letter-spacing: 0.035em;
   --auscope-footer-column-spacing: 2.5rem;
   --auscope-footer-bottom-spacing: 3.125rem;
   --auscope-footer-acknowledgement-gap: 0.3125rem;

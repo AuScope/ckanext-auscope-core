@@ -402,8 +402,9 @@ development database again. CI was not re-run for this change.
 - Date: 2026-11-03. Status: Accepted (licensing assumption open).
 - Decision: include the AuScope logo, reversed logo and icon (copied unmodified from
   PIDINST, renamed to kebab-case) and a 64×64 favicon derived from the icon. Exclude
-  the Calibre fonts (commercial Klim typeface, no redistribution licence found; a
-  system font stack is used instead), the NCRIS logos (footer, Issue #3) and the
+  the Calibre fonts (commercial Klim typeface, no redistribution licence found;
+  family-name support and system fallbacks are provided instead), the NCRIS logos
+  (footer, Issue #3) and the
   homepage hero photos (large content images with unknown credit).
 - Assumption: AuScope has authorised use of its logos in this public package. Not yet
   confirmed; confirm with AuScope.
@@ -429,8 +430,8 @@ development database again. CI was not re-run for this change.
   - The active-nav indicator is royal blue; teal (2.16:1 on white) is decorative only.
   - Danger, success, warning and info keep Bootstrap semantics; the legacy
     white-on-tangerine and white-on-red combinations are not reproduced.
-  - Body font size is `1rem`, up from CKAN 2.12.1's `0.875rem`, for readability
-    (close to the legacy `1.063rem`, without its forced-size selector list).
+  - Body font size initially became `1rem`, up from CKAN 2.12.1's `0.875rem`;
+    ADR-030 later aligned it to the legacy `1.063rem` and relevant control sizes.
   - Dark-surface rule: containers with a primary or primary-hover background set
     `--auscope-focus-ring-color` and `--bs-heading-color` to explicit `var(...)`
     values, never `inherit` (which would give royal blue on royal blue).
@@ -619,6 +620,29 @@ Not verified: CI was not re-run; CKAN 2.11.4 and 2.10.1.
   upgrade surface is three focused layout overrides plus `base.html`, rather than a
   copied `page.html`.
 
+## ADR-030: Legacy typography with consumer-supplied Calibre
+
+- Date: 2026-11-10. Status: Accepted.
+- Context: the three established sites use `CalibreWeb-Light.woff` for body text and
+  `CalibreWeb-Medium.woff` for footer labels, a 1.063rem body, and an explicit
+  2rem/1.75rem/1.313rem heading scale. Neither reference repository contains a
+  font licence or redistribution grant. Core's system-only 1rem scale made the
+  CKAN 2.12 site visibly heavier and more compact.
+- Decision:
+  - use the established `Calibre-light` and `Calibre-Medium` family names in public
+    tokens, followed by Inter/Segoe UI/Roboto/Arial fallbacks;
+  - reproduce the established body, heading, control, footer-label and homepage
+    card metrics through existing token and CSS layers;
+  - ship no font binaries and no `@font-face` URLs; a licensed consumer supplies
+    those declarations in its own bundle;
+  - set the `body` background directly to the footer token so short pages remain
+    grey below the footer, without changing Bootstrap's `--bs-body-bg`; and
+  - retain Core's focus indicators, underlined prose links, contrast-safe footer
+    text, semantic button variants and royal-blue active-nav indicator.
+- Consequences: deployments with licensed Calibre files match the established type
+  rendering; other deployments keep the same metrics with system fallbacks. The
+  shared CSS remains free of font assets, `url()` and new template overrides.
+
 ## Verification record: Issue #3 (2026-11-10)
 
 Environment: Windows host, Python 3.12.5, Podman 6.0.2; `ckan-dev` runs CKAN
@@ -627,14 +651,14 @@ Environment: Windows host, Python 3.12.5, Podman 6.0.2; `ckan-dev` runs CKAN
 | Check | Result |
 |---|---|
 | Guarded test DB initialisation | `sh docker/ckan/test-env.sh ckan -c test.ini db init`: `Upgrading DB: SUCCESS` |
-| Full guarded suite | `66 passed in 21.99s` after the visual refinement |
+| Full guarded suite | `70 passed in 46.87s` after the final typography alignment |
 | Development-data isolation | `auscope-branding-check` kept ID `884877d4-2a6a-40aa-bbfc-71d164ac6932` before and after the guarded suite |
 | Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
 | Wheel | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 31 entries; includes all five shared templates and four CSS files |
 | HTTP pages and internal navigation destinations | `/`, `/dataset`, `/organization`, `/group`, `/about`, `/user/login` and the demo dataset all returned 200 |
-| Edge at 1280×900 and 375×800 | 92 of 92 checks passed across home, dataset list/detail, login and about; keyboard-opened mobile menu, focus outlines, full-width search, responsive footer and theme overflow checks passed; 0 console errors, page errors or responses at least 400 |
+| Edge at 1280×900 and 375×800 | 122 of 122 checks passed across home, dataset list/detail, login and about; exact body and footer-label metrics, grey body/footer background, keyboard-opened mobile menu, focus outlines, full-width search, responsive footer and theme overflow checks passed; 0 console errors, page errors or responses at least 400 |
 | Fresh public-site comparison | Read-only GET captures of Data, Sample and PIDINST at both viewports completed; mark/title/nav sizing, borderless masthead, centred mobile brand and three-column/stacked footer now align closely |
-| Intentional differences | System font replaces unlicensed Calibre; NCRIS artwork is text-only pending permission; annual reporting links remain consumer content; accessible footer text replaces the legacy 2.77:1 muted colour |
+| Intentional differences | Calibre family names and metrics are supported but binaries remain consumer-supplied; NCRIS artwork is text-only pending permission; annual reporting links remain consumer content; accessible footer text replaces the legacy 2.77:1 muted colour |
 | Reference repositories | Data/Sample HEAD `2c10d5b`; PIDINST HEAD `974efdf`; their pre-existing status entries were unchanged |
 
 The development Compose stack remains running for manual review at

@@ -46,8 +46,9 @@ confirmed; confirm with AuScope (also recorded in ADR-024).
 
 - **Calibre fonts** (used by the reference repositories): a commercial Klim Type
   Foundry typeface. No redistribution licence was found, so the fonts are not
-  shipped. The `--auscope-font-family-base` token uses a system font stack;
-  consumers holding a Calibre web licence can add `@font-face` in their own bundle.
+  shipped. The font tokens advertise the established `Calibre-light` and
+  `Calibre-Medium` family names with system fallbacks; consumers holding a Calibre
+  web licence can add `@font-face` in their own bundle.
 - **NCRIS logos**: used only in the footer (Issue #3) and subject to Australian
   Government branding rules.
 - **Homepage hero photos**: repository-specific homepage content (0.9 MB and 1.3 MB)

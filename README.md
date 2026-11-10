@@ -112,8 +112,43 @@ consumer's `base.html` `{% ckan_extends %}` extends the shared one.
 Shipped images are served from `/auscope_core/images/`: `auscope-logo.png`,
 `auscope-logo-reversed.png` (for dark backgrounds), `auscope-logo-icon.png` and
 `auscope-favicon.png`. Licensing and attribution are in
-`ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`. The Calibre font is
-not shipped (no redistribution licence); the base font is a system font stack.
+`ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`.
+
+### Calibre font support
+
+The established repositories use `CalibreWeb-Light.woff` and
+`CalibreWeb-Medium.woff`, but neither reference repository documents a licence that
+permits redistribution. Core therefore ships no font binaries and no font URLs. Its
+tokens use the legacy family names first, followed by maintained system fallbacks:
+
+```css
+--auscope-font-family-base: "Calibre-light", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+--auscope-font-family-medium: "Calibre-Medium", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+```
+
+A consumer with its own permission can serve the WOFF files and declare them in a
+consumer bundle loaded after Core:
+
+```css
+@font-face {
+  font-family: "Calibre-light";
+  src: url("/consumer/fonts/CalibreWeb-Light.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Calibre-Medium";
+  src: url("/consumer/fonts/CalibreWeb-Medium.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+```
+
+The EOT files are not needed for CKAN 2.12's supported browsers. A consumer must
+keep its font licence and attribution with the deployment.
 
 ## Shared templates and layouts
 
