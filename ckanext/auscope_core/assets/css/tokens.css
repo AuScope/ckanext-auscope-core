@@ -46,7 +46,7 @@
   /* Components */
   --auscope-masthead-bg: var(--auscope-color-surface);
   --auscope-masthead-color: var(--auscope-color-text);
-  --auscope-masthead-accent: var(--auscope-color-accent);
+  --auscope-masthead-accent: var(--auscope-color-accent); /* retained API; opt-in */
   --auscope-nav-active-color: var(--auscope-color-primary);
   --auscope-nav-active-indicator: var(--auscope-color-primary);
   --auscope-account-masthead-bg: var(--auscope-color-surface);
@@ -55,8 +55,17 @@
   --auscope-home-search-bg: var(--auscope-color-white);
   --auscope-home-search-color: var(--auscope-color-text);
   --auscope-home-search-tags-bg: var(--auscope-color-primary);
-  --auscope-logo-height: 3rem;
-  --auscope-logo-height-sm: 2.25rem;
-  --auscope-header-title-size: 1.375rem;
-  --auscope-header-title-size-sm: 1rem;
+  --auscope-logo-height: 3.75rem;
+  --auscope-logo-height-sm: 2.75rem;
+  --auscope-header-brand-gap: 0.625rem;
+  --auscope-header-title-size: 1.5rem;
+  --auscope-header-title-size-sm: 1.125rem;
+  --auscope-header-mobile-row-gap: 0.5rem;
+  --auscope-header-nav-size: 1.2rem;
+  --auscope-account-nav-size: 1rem;
+  --auscope-footer-heading-size: 1.3125rem;
+  --auscope-footer-column-spacing: 2.5rem;
+  --auscope-footer-bottom-spacing: 3.125rem;
+  --auscope-footer-acknowledgement-gap: 0.3125rem;
+  --auscope-footer-social-size: 1.25rem;
 }

@@ -91,7 +91,7 @@ Other conventions in the legacy stylesheet:
 - The header logo text and navigation differ by repository: "AuScope Data
   Repository" and "AuScope Instrument Registry", each with its own nav tabs. The
   footers differ in their NCRIS years and social links (Twitter vs Bluesky). Both are
-  Issue #3.
+  handled by Issue #3's native configuration and template blocks.
 - `pidinst_theme.css` (26 KB) and `igsn_theme.css` are almost all product-specific:
   instrument cards, vocab pickers, facet sidebars, `.stages` and `.badge` variants.
   The badge palette uses Bootstrap's success, warning and info colours rather than
@@ -113,11 +113,13 @@ The resulting baseline and the remaining differences are in
 **Repository-specific (stays in each consumer)**: Leaflet, jsTree and DataTables
 vendor bundles; map, composite-field, ROR, GCMD and DOI JS modules; scheming form
 styles (`.composite-*`, `.ror-*`, `.schema-table`); instrument cards; facet sidebars;
-the loader; `.stages` tweaks; repository names and navigation; footers; RudderStack
-analytics.
+the loader; `.stages` tweaks; repository navigation, authentication links, annual
+reporting links and approved NCRIS artwork; RudderStack analytics.
 
-**Issue #3**: the header logo and text block, the navigation, the footer contents and
-NCRIS logos, and the `page.html` secondary-column logic.
+**Issue #3** shares the header brand geometry, three-column footer and homepage
+geometry. It deliberately leaves CKAN's `page.html` untouched and exposes native
+blocks for consumer navigation, authentication, homepage content and footer
+differences.
 
 ## Problems in legacy CSS not to copy
 

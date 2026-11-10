@@ -5,7 +5,7 @@
   can replace this block or either nested AuScope block without copying the header.
 #}
 {% block header_logo %}
-  <a class="logo auscope-header-brand d-flex align-items-center gap-3"
+  <a class="logo auscope-header-brand d-flex align-items-center"
      href="{{ h.url_for('home.index') }}"
      aria-label="{{ _('Navigate to Home - {site_title}').format(site_title=g.site_title) }}">
     {% block auscope_header_brand_mark %}

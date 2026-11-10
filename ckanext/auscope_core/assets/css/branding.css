@@ -23,7 +23,6 @@
 .masthead {
   background: var(--auscope-masthead-bg);
   color: var(--auscope-masthead-color);
-  border-block-end: 4px solid var(--auscope-masthead-accent);
 }
 
 /* Text title, shown when ckan.site_logo is empty */
@@ -43,6 +42,7 @@
 }
 
 .masthead .auscope-header-brand {
+  gap: var(--auscope-header-brand-gap);
   color: var(--auscope-masthead-color);
   text-decoration: none;
 }
@@ -50,7 +50,7 @@
 .masthead .auscope-header-brand__title {
   color: var(--auscope-nav-active-color);
   font-size: var(--auscope-header-title-size);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
 }
 
@@ -64,10 +64,39 @@
   }
 }
 
+@media (max-width: 991.98px) {
+  .masthead .navbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: var(--auscope-header-mobile-row-gap);
+  }
+
+  .masthead .header-image {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .masthead .auscope-header-brand {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .masthead .navbar-toggler {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .masthead .main-navbar {
+    grid-column: 1 / -1;
+    inline-size: 100%;
+  }
+}
+
 /* Masthead navigation */
 /* 1. base (0,2,3) */
 .masthead .main-navbar ul li a {
   color: var(--auscope-masthead-color);
+  font-size: var(--auscope-header-nav-size);
 }
 
 /* 2. active (0,3,3) */
@@ -108,11 +137,12 @@
 }
 
 .account-masthead .account ul li {
-  border-inline-start-color: var(--auscope-color-border);
+  border-inline-start: 0;
 }
 
 .account-masthead .account ul li a {
   color: var(--auscope-color-text);
+  font-size: var(--auscope-account-nav-size);
 }
 
 .account-masthead .account ul li a:hover,
@@ -133,6 +163,20 @@
   --bs-heading-color: var(--auscope-footer-color);
 }
 
+.site-footer .auscope-footer__main > section {
+  margin-block: var(--auscope-footer-column-spacing);
+}
+
+.site-footer .auscope-footer__heading {
+  color: var(--auscope-footer-color);
+  font-size: var(--auscope-footer-heading-size);
+  font-weight: 400;
+}
+
+.site-footer address {
+  font-style: normal;
+}
+
 .site-footer a,
 .site-footer label,
 .site-footer small,
@@ -141,10 +185,17 @@
   color: var(--auscope-footer-color);
 }
 
+.site-footer .auscope-footer__social-links a {
+  font-size: var(--auscope-footer-social-size);
+  text-decoration: none;
+}
+
 .site-footer .auscope-footer__bottom {
-  border-block-start: 1px solid var(--auscope-footer-color);
-  margin-block-start: 2rem;
-  padding-block-start: 1.5rem;
+  margin-block-end: var(--auscope-footer-bottom-spacing);
+}
+
+.site-footer .auscope-footer__acknowledgement {
+  margin-block-end: var(--auscope-footer-acknowledgement-gap);
 }
 
 /* Homepage search: light search box (CKAN sets white text on .module-search) */

@@ -29,8 +29,11 @@ def test_header_and_footer_render_on_common_pages(app):
             heading.get_text(" ", strip=True)
             for heading in soup.select("footer.site-footer h2")
         }
-        assert headings == {"Contact", "Funding", "Community"}
-        assert soup.select_one(".auscope-footer__bottom .attribution")
+        assert headings == {"Contact Us", "Funding", "Community"}
+        assert soup.select_one(".auscope-footer__main address")
+        assert soup.select_one(".auscope-footer__social-links")
+        acknowledgement = soup.select_one(".auscope-footer__acknowledgement")
+        assert "past, present and emerging" in acknowledgement.get_text(" ", strip=True)
 
 
 @pytest.mark.ckan_config("ckan.plugins", "auscope_core")
@@ -51,8 +54,19 @@ def test_templates_expose_consumer_customisation_blocks():
     assert "{% ckan_extends %}" in header
     assert "block auscope_header_brand_mark" in header
     assert "block auscope_header_repository_title" in header
-    for name in ("contact", "funding", "community", "acknowledgement"):
+    for name in (
+        "contact",
+        "funding",
+        "funding_branding",
+        "community",
+        "community_links",
+        "social_links",
+        "acknowledgement",
+        "meta",
+    ):
         assert f"block auscope_footer_{name}" in footer
+    assert "block footer_attribution" in footer
+    assert "block footer_lang" in footer
     for name in ("search", "promoted", "featured_group", "featured_organization"):
         assert f"block {name}" in home
 

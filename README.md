@@ -118,9 +118,9 @@ not shipped (no redistribution licence); the base font is a system font stack.
 ## Shared templates and layouts
 
 The shared header keeps CKAN's account controls, responsive menu and site search.
-It combines `ckan.site_logo` with `ckan.site_title`. The footer supplies common
-contact, NCRIS funding, AuScope community and acknowledgement content while keeping
-CKAN's language selector. The homepage places the CKAN search across the full
+It combines `ckan.site_logo` with `ckan.site_title`. The footer supplies the
+established three-column AuScope contact, NCRIS funding and community content plus
+the shared acknowledgement. The homepage places the CKAN search across the full
 container and leaves the two lower columns available through CKAN's `promoted` and
 `featured_organization` blocks. Ordinary pages continue to use CKAN's unmodified
 `page.html`, including its skip link, breadcrumb and responsive sidebar.
@@ -146,7 +146,10 @@ Available customisation points are:
   `header.html`; the standard CKAN `header_site_navigation_tabs`,
   `header_account_notlogged` and `header_site_search` blocks remain available.
 - `auscope_footer_contact`, `auscope_footer_funding`,
-  `auscope_footer_community` and `auscope_footer_acknowledgement` in `footer.html`.
+  `auscope_footer_funding_branding`, `auscope_footer_community`,
+  `auscope_footer_community_links`, `auscope_footer_social_links` and
+  `auscope_footer_acknowledgement` in `footer.html`. `auscope_footer_meta` retains
+  CKAN's `footer_attribution` and `footer_lang` names as opt-in blocks.
 - `search`, `promoted`, `featured_group` and `featured_organization` in
   `home/index.html`.
 - CKAN's normal `secondary_content`, `primary_content`, `pre_primary`,
@@ -165,8 +168,9 @@ macro:
 Data, Sample, PIDINST and RAiD should set their own `ckan.site_title`, override the
 navigation block with routes supplied by their plugins, and override only footer or
 homepage blocks whose content differs. The core intentionally does not provide AAF
-routes, contact forms, instrument/platform routes, reporting-year links or
-repository-specific homepage copy.
+routes, contact forms, instrument/platform routes, annual reporting links or
+repository-specific homepage copy. A consumer may add approved NCRIS artwork in
+`auscope_footer_funding_branding`; it must also record the asset licence.
 
 ### Visual check
 
@@ -174,7 +178,7 @@ With the development stack running:
 
 1. Set `CKAN__SITE_TITLE=AuScope Data Repository` (or another repository name),
    then open http://localhost:5000/, `/dataset`, `/user/login` and `/about`. Expect a
-   light grey masthead with the AuScope icon and title and a teal line under it, a
+   light grey masthead with the AuScope icon and title and no decorative border, a
    full-width white homepage search box above a royal-blue "Popular tags" strip,
    and a three-column grey footer with royal-blue text. The intended look is
    described in [docs/design-baseline.md](docs/design-baseline.md).

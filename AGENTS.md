@@ -49,6 +49,9 @@ Never copy credentials or `.env` values from these repositories.
 - Prefer native CKAN extension APIs over custom implementations.
 - Never modify CKAN core.
 - Minimise overrides of CKAN core templates.
+- Keep repository navigation, authentication workflows, annual reporting links and
+  homepage copy in consumer extensions; customise shared layouts through the
+  documented CKAN and `auscope_*` blocks.
 - Keep business logic and repository-specific schemas out of the shared extension.
 - Use maintainable Python code with clear tests.
 - Pin dependencies where appropriate.

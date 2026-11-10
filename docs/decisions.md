@@ -473,7 +473,8 @@ development database again. CI was not re-run for this change.
   its focus-ring and heading colours from `--auscope-footer-color`, so a consumer
   can restore a dark footer by changing the two footer tokens. The dark-surface rule
   moves from `.homepage .module-search` to the `.tags` strip. No muted footer colour
-  is added. The teal line under the masthead stays as the brand accent.
+  is added. The teal line under the masthead stayed temporarily as the brand accent;
+  ADR-029 later removed it when Issue #3 aligned the complete header geometry.
 - Consequences: one look across all four repositories with no new selectors or
   templates. Footer content and layout, header text, and the homepage layout remain
   Issue #3. CKAN's white "Powered by ckan" footer image is faint on grey until
@@ -604,8 +605,15 @@ Not verified: CI was not re-run; CKAN 2.11.4 and 2.10.1.
     reusable CKAN module markup instead.
 - Asset decision: the legacy NCRIS image remains excluded because no redistribution
   permission was found. The footer provides the NCRIS attribution and official
-  links as text. A consumer with an approved image can override
-  `auscope_footer_funding` and must add the asset to `ASSETS-LICENSES.md`.
+  links as text. A consumer with an approved image can override the focused
+  `auscope_footer_funding_branding` block and must add the asset to
+  `ASSETS-LICENSES.md`.
+- Visual-baseline refinement: use the common legacy contact details, funding text,
+  current Bluesky/Instagram/LinkedIn links, complete acknowledgement, 60 px desktop
+  mark, 1.2rem navigation and centred mobile brand/toggler geometry. The earlier
+  masthead accent line and default CKAN attribution/language controls are omitted
+  because they do not appear in the reference sites; their standard block names
+  remain available to consumers. Annual reporting links stay repository-owned.
 - Consequences: consumers customise shared layouts without copying them, while
   repository routes, homepage copy and workflows remain outside the core. The
   upgrade surface is three focused layout overrides plus `base.html`, rather than a
@@ -619,13 +627,14 @@ Environment: Windows host, Python 3.12.5, Podman 6.0.2; `ckan-dev` runs CKAN
 | Check | Result |
 |---|---|
 | Guarded test DB initialisation | `sh docker/ckan/test-env.sh ckan -c test.ini db init`: `Upgrading DB: SUCCESS` |
-| Full guarded suite | `66 passed in 41.19s`; repeated after seeding the development dataset: `66 passed in 33.19s` |
+| Full guarded suite | `66 passed in 21.99s` after the visual refinement |
 | Development-data isolation | `auscope-branding-check` kept ID `884877d4-2a6a-40aa-bbfc-71d164ac6932` before and after the guarded suite |
 | Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
 | Wheel | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 31 entries; includes all five shared templates and four CSS files |
 | HTTP pages and internal navigation destinations | `/`, `/dataset`, `/organization`, `/group`, `/about`, `/user/login` and the demo dataset all returned 200 |
 | Edge at 1280×900 and 375×800 | 92 of 92 checks passed across home, dataset list/detail, login and about; keyboard-opened mobile menu, focus outlines, full-width search, responsive footer and theme overflow checks passed; 0 console errors, page errors or responses at least 400 |
-| Screenshot review against legacy captures | Shared icon/title header, full-width search, two-column home content and stacked mobile footer align; NCRIS is deliberately text-only (ADR-029) |
+| Fresh public-site comparison | Read-only GET captures of Data, Sample and PIDINST at both viewports completed; mark/title/nav sizing, borderless masthead, centred mobile brand and three-column/stacked footer now align closely |
+| Intentional differences | System font replaces unlicensed Calibre; NCRIS artwork is text-only pending permission; annual reporting links remain consumer content; accessible footer text replaces the legacy 2.77:1 muted colour |
 | Reference repositories | Data/Sample HEAD `2c10d5b`; PIDINST HEAD `974efdf`; their pre-existing status entries were unchanged |
 
 The development Compose stack remains running for manual review at
