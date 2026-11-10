@@ -1,7 +1,7 @@
 # Issue #2: branding analysis of the reference repositories
 
-Date: 2026-11-03. Branch `feature/2-shared-branding` (currently at `c2fd19c`, which
-contains the unmerged Issue #1/#5 commits; `origin/main` holds only the initial commit).
+Date: 2026-11-03. Branch `feature/2-shared-branding`, stacked on the unmerged
+Issue #1 test-isolation and Issue #5 compatibility branches (ADR-027).
 
 ## Scope and method
 

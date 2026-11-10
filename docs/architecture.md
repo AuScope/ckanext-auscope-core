@@ -72,7 +72,7 @@ Interfaces used now:
 
 | Interface | Purpose |
 |---|---|
-| `IConfigurer.update_config` | `add_template_directory("templates")`, `add_public_directory("public")`, `add_resource("assets", "auscope_core")`; replaces `ckan.site_logo` / `ckan.favicon` with the AuScope files only when they equal CKAN's defaults (ADR-022) |
+| `IConfigurer.update_config` | `add_template_directory("templates")`, `add_public_directory("public")`, `add_resource("assets", "auscope_core")`; replaces `ckan.site_logo` / `ckan.favicon` with the AuScope files only when they equal CKAN's defaults (ADR-023) |
 
 Interfaces that may be added later, only for needs shared by all consumers:
 `ITemplateHelpers` (shared helpers), `IBlueprint` (shared pages),
@@ -105,7 +105,7 @@ ckan.plugins = <repository_theme> auscope_core <other plugins> envvars
 - `public/` is served at the site root (registered in CKAN's
   `plugin_public_paths`). Shared files live under `public/auscope_core/`, so they
   are served at `/auscope_core/...` and cannot clash with consumers' `/base/...`
-  files (ADR-025).
+  files (ADR-026).
 - `assets/` is the Webassets library `auscope_core`. Bundles defined in
   `assets/webassets.yml` are referenced as `auscope_core/<bundle>`, for example
   `{% asset 'auscope_core/auscope_core-css' %}`.
@@ -113,7 +113,7 @@ ckan.plugins = <repository_theme> auscope_core <other plugins> envvars
 ## Styling architecture
 
 The theme is plain CSS layered over CKAN 2.12.1's unmodified `main.css`
-(Bootstrap 5). There is no Sass or Node build step (ADR-020).
+(Bootstrap 5). There is no Sass or Node build step (ADR-021).
 
 | Layer | File | Role |
 |---|---|---|
@@ -125,7 +125,7 @@ The theme is plain CSS layered over CKAN 2.12.1's unmodified `main.css`
 Bundles: `auscope_core-tokens` (tokens only) and `auscope_core-css` (base,
 components, branding, with `extra.preload: [auscope_core/auscope_core-tokens]`).
 CKAN's `include_asset` emits preloaded bundles first and only once.
-`auscope_core-js` is registered but not included (ADR-021).
+`auscope_core-js` is registered but not included (ADR-022).
 
 Inclusion: `templates/base.html` extends core with `{% ckan_extends %}` and, in
 `{% block styles %}`, renders `{{ super() }}` (core `main.css`) followed by the
@@ -135,7 +135,7 @@ therefore core `main.css`, tokens, shared CSS, consumer bundles, then
 order; selectors that compete with more specific CKAN rules state their specificity
 in comments.
 
-Rules that keep the theme accessible (ADR-024): brand values only in
+Rules that keep the theme accessible (ADR-025): brand values only in
 `tokens.css`; prose links underlined; focus outlines never removed, with one
 `:focus-visible` selector per CKAN `outline: 0` rule on a rendered component;
 containers with their own colour scheme (`.site-footer`, the homepage

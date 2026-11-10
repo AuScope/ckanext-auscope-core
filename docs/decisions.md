@@ -80,7 +80,7 @@ Checked on 2026-11-02 while setting up Issue #1.
 
 ## ADR-007: Minimal plugin
 
-- Date: 2026-11-02. Status: Partly superseded by ADR-021 (templates). The
+- Date: 2026-11-02. Status: Partly superseded by ADR-022 (templates). The
   empty-directory wheel gap is fixed for `templates/` and `public/`, which now hold
   real files; `i18n/` still holds only `.gitkeep`.
 - Context: Issue #1 is the skeleton only; styling, branding and UI are separate
@@ -94,7 +94,7 @@ Checked on 2026-11-02 while setting up Issue #1.
 
 ## ADR-008: Placeholder Webassets bundles
 
-- Date: 2026-11-02. Status: Superseded by ADR-021.
+- Date: 2026-11-02. Status: Superseded by ADR-022.
 - Decision: `assets/webassets.yml` defines `auscope_core-css` and `auscope_core-js`,
   each pointing to a comment-only file. No template includes them.
 - Consequences: establishes the bundle naming convention (`auscope_core/<bundle>`)
@@ -350,7 +350,7 @@ development database again. CI was not re-run for this change.
   package's Python >=3.10 requirement excludes older Python environments otherwise
   accepted by CKAN 2.10.1 and 2.11.4. CKAN 2.11.4 and 2.10.1 are not yet verified.
 
-## ADR-020: Plain CSS design tokens layered over CKAN `main.css`
+## ADR-021: Plain CSS design tokens layered over CKAN `main.css`
 
 - Date: 2026-11-03. Status: Accepted.
 - Context: the reference repositories ship a 23 KB legacy `shared_style.css` that
@@ -367,7 +367,7 @@ development database again. CI was not re-run for this change.
   Some CKAN colours not covered (for example `.btn-default`, the activity stream)
   stay CKAN teal until a consumer needs them.
 
-## ADR-021: Bundles and `base.html` inclusion
+## ADR-022: Bundles and `base.html` inclusion
 
 - Date: 2026-11-03. Status: Accepted. Supersedes ADR-008; partly supersedes ADR-007
   (templates).
@@ -381,7 +381,7 @@ development database again. CI was not re-run for this change.
   their own `base.html` without a config option. The integration test on the
   rendered link order catches a renamed core `styles` block.
 
-## ADR-022: Logo and favicon defaults only when CKAN defaults are in effect
+## ADR-023: Logo and favicon defaults only when CKAN defaults are in effect
 
 - Date: 2026-11-03. Status: Accepted.
 - Context: CKAN fills in config defaults before plugins' `update_config` runs, and
@@ -397,7 +397,7 @@ development database again. CI was not re-run for this change.
   sysadmin values from `system_info` are applied later and also win. To keep CKAN's
   logo, set any other path. The rule is idempotent.
 
-## ADR-023: Brand assets included and excluded
+## ADR-024: Brand assets included and excluded
 
 - Date: 2026-11-03. Status: Accepted (licensing assumption open).
 - Decision: include the AuScope logo, reversed logo and icon (copied unmodified from
@@ -414,7 +414,7 @@ development database again. CI was not re-run for this change.
   `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`; a test fails if an
   image has no entry there.
 
-## ADR-024: Accessibility deviations from the legacy CSS
+## ADR-025: Accessibility deviations from the legacy CSS
 
 - Date: 2026-11-03. Status: Accepted.
 - Decision:
@@ -437,7 +437,7 @@ development database again. CI was not re-run for this change.
 - Consequences: `test_theme_css.py` checks token contrast (≥ 4.5 text, ≥ 3.0
   non-text) and these rules statically. Body text is 14 % larger on every CKAN page.
 
-## ADR-025: `/auscope_core/` public namespace
+## ADR-026: `/auscope_core/` public namespace
 
 - Date: 2026-11-03. Status: Accepted.
 - Decision: shared static files live in `public/auscope_core/` and are served at
@@ -445,17 +445,20 @@ development database again. CI was not re-run for this change.
 - Consequences: no clash with consumers' existing `/base/images/AuScope Logo*.png`
   files while they migrate.
 
-## ADR-026: Issue #2 branch base
+## ADR-027: Issue #2 branch base
 
-- Date: 2026-11-03. Status: Accepted.
-- Context: the Issue #1 and Issue #5 work is not on `origin/main`, which holds only
-  the initial commit.
-- Decision: `feature/2-shared-branding` is branched from
-  `feature/5-ckan-compatibility` (`c2fd19c`).
-- Consequences: merge in the order Issue #1 → #5 → #2, or rebase this branch onto
-  `main` after those branches have merged.
+- Date: 2026-11-03, updated 2026-11-09. Status: Accepted.
+- Context: the Issue #1 test-isolation fix (ADR-019) and the Issue #5
+  compatibility policy (ADR-020) are not on `origin/main` yet.
+- Decision: `feature/2-shared-branding` is stacked on
+  `feature/5-ckan-compatibility`, which is stacked on
+  `feature/1-test-db-isolation`, which is based on `origin/main` (`bae43e6`,
+  Issue #1 merged as PR #7).
+- Consequences: merge in the order `feature/1-test-db-isolation` →
+  `feature/5-ckan-compatibility` → `feature/2-shared-branding`, or rebase this
+  branch onto `main` after the other two have merged.
 
-## ADR-027: Light surfaces aligned with the legacy sites
+## ADR-028: Light surfaces aligned with the legacy sites
 
 - Date: 2026-11-03. Status: Accepted. Amends the surface colours chosen for Issue #2.
 - Context: the Data, Sample and PIDINST public sites all render a `#f2f2f1`
@@ -492,7 +495,7 @@ on Python 3.14.10 (pytest 9.1.1). Browser: Microsoft Edge (headless, via Playwri
 | Contrast test mutation: `--auscope-color-royal-blue: #59c2aa` | 9 failed (8 contrast pairs and the `-rgb` triplet test); reverted |
 | Dark-surface test mutation: footer `--bs-heading-color: inherit` | the `.site-footer` dark-surface test failed; reverted |
 | Favicon (Pillow 12.3.0 in `ckan-dev`) | `(64, 64) RGBA`; copied logos match the source MD5s |
-| `pip wheel --no-deps` (clean `build/`) and listing | contains `webassets.yml`, the 4 CSS files, `js/auscope_core.js`, `templates/base.html`, the 4 PNGs and `ASSETS-LICENSES.md`; no `auscope_core.css` and no `.gitkeep` under `templates/` or `public/` (`i18n/.gitkeep` remains). No font files (excluded, ADR-023) |
+| `pip wheel --no-deps` (clean `build/`) and listing | contains `webassets.yml`, the 4 CSS files, `js/auscope_core.js`, `templates/base.html`, the 4 PNGs and `ASSETS-LICENSES.md`; no `auscope_core.css` and no `.gitkeep` under `templates/` or `public/` (`i18n/.gitkeep` remains). No font files (excluded, ADR-024) |
 | Wheel installed into a clean venv | entry point `ckanext.auscope_core.plugin:AuscopeCorePlugin`; CSS, PNGs, licence file and `templates/base.html` present in site-packages |
 | Dev stack pages `/`, `/dataset`, `/dataset/auscope-branding-check`, `/user/login`, `/about` | all 200; all 20 same-origin CSS/JS/image URLs they reference return 200 (`/auscope_core/images/auscope-logo.png` and `auscope-favicon.png` as `image/png`) |
 | Rendered `<head>` | `main.css` < `auscope_core-tokens.css` < `auscope_core.css`; logo `src` and favicon `href` point at `/auscope_core/images/` |
@@ -529,8 +532,8 @@ development database (the demo dataset, organisation and user were gone afterwar
 and had to be re-seeded before the browser check). The likely cause is that the
 container's `CKAN_SQLALCHEMY_URL` environment variable overrides `sqlalchemy.url`
 from `test.ini`. Not changed here; it needs its own fix, in the same way ADR-016
-isolated Solr. Fixed on `feature/1-test-db-isolation` (`cc598a4`, its ADR-019:
-`docker/ckan/test-env.sh`); this branch does not contain that fix yet.
+isolated Solr. Fixed by ADR-019 (`docker/ckan/test-env.sh`), which this branch now
+contains.
 
 ## Verification record: Issue #2 final checks (2026-11-09)
 
@@ -557,4 +560,24 @@ documented in `README.md` and `docs/design-baseline.md`, 61 tests).
 Not verified: the wheel was not reinstalled into a clean venv in this run (done in
 the earlier records); CKAN 2.11.4 and 2.10.1; browsers other than Edge; a manual
 keyboard and screen-reader walkthrough. Logo redistribution permission from AuScope
-is still an assumption (ADR-023).
+is still an assumption (ADR-024).
+
+## Verification record: rebase onto main (2026-11-09)
+
+Stack: `main` (`bae43e6`) ← `feature/1-test-db-isolation` ←
+`feature/5-ckan-compatibility` ← `feature/2-shared-branding`. ADRs renumbered:
+the compatibility ADR is ADR-020 and the Issue #2 ADRs are ADR-021 to ADR-028.
+Windows host, Python 3.12.5, Podman 6.0.2, CKAN 2.12.1 in `ckan-dev`.
+
+| Check | Result |
+|---|---|
+| `ruff check .` (ruff 0.17.3) on all three branches | `All checks passed!` |
+| `sh docker/ckan/test-env.sh ckan -c test.ini db init` in `ckan-dev` | `Upgrading DB: SUCCESS` on all three branches |
+| `sh docker/ckan/test-env.sh pytest --ckan-ini=test.ini -p no:cacheprovider -v ckanext/auscope_core` | `7 passed` on `feature/1-test-db-isolation` and `feature/5-ckan-compatibility`; `61 passed in 39.55s` on this branch |
+| Seed the demo dataset, re-run the wrapped pytest, then `GET /dataset/auscope-branding-check` | `61 passed in 49.54s`; the page still returns 200 (dev DB untouched) |
+| `podman compose up -d --build`, then `GET /api/3/action/status_show` | `ckan_version` `2.12.1`; extensions `auscope_core`, `image_view`, `text_view`, `datatables_view`, `envvars` |
+| `.agents/tasks/browser_check.py` (headless Edge, 1280×900 and 375×800) | 58 of 58 checks passed; 0 console errors, 0 page errors, 0 responses ≥ 400 |
+| `python -m pip wheel --no-deps -w $env:TEMP\acore-wheel-rebase .` | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 26 entries, including the 4 CSS files, `templates/base.html`, 4 PNGs and `ASSETS-LICENSES.md` |
+| Reference repositories (`git rev-parse`, `git status --porcelain`) | ckan-docker HEAD `2c10d5b0`, 8 entries; PIDINST HEAD `974efdfd`, 10 entries: unchanged |
+
+Not verified: CI was not re-run; CKAN 2.11.4 and 2.10.1.

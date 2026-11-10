@@ -33,20 +33,20 @@ PIDINST's fork). The three live sites render the same palette and surfaces.
 
 | Area | Legacy | Core | Decision | Scope |
 |---|---|---|---|---|
-| Footer colour | Grey `#d8d9d7`, royal-blue text | Was royal blue with white text; now grey with royal-blue text | Aligned (ADR-027) | Issue #2, fixed |
+| Footer colour | Grey `#d8d9d7`, royal-blue text | Was royal blue with white text; now grey with royal-blue text | Aligned (ADR-028) | Issue #2, fixed |
 | Footer muted text | `#7e7caa` on grey (2.77:1) | Not provided | Deliberate: fails WCAG AA; footer content is Issue #3 | Issue #3 |
 | Footer content | Contact, funding, NCRIS logo, socials, acknowledgement | CKAN's default footer | Deferred | Issue #3 |
-| Masthead background | `#f2f2f1`, no border | Was white; now `#f2f2f1` with a teal line | Colour aligned (ADR-027); teal line kept as the brand accent | Issue #2, fixed |
+| Masthead background | `#f2f2f1`, no border | Was white; now `#f2f2f1` with a teal line | Colour aligned (ADR-028); teal line kept as the brand accent | Issue #2, fixed |
 | Header logo and title | Icon plus repository name text | Full wordmark via `ckan.site_logo` | Deferred: repository names are configurable header content | Issue #3 |
 | Nav link size | 1.2rem | CKAN size | Deferred with the header | Issue #3 |
-| Homepage search box | White box, black heading, royal-blue keyword strip; full-width layout | Was royal-blue box and dark-blue strip; now white box, royal-blue heading, royal-blue strip | Colours aligned (ADR-027); layout and "Popular keywords" wording are templates | Issue #2 fixed; layout Issue #3 |
-| Font family | Calibre (Light/Medium web fonts) | System font stack | Deliberate: no redistribution licence for Calibre (ADR-023) | Deliberate |
+| Homepage search box | White box, black heading, royal-blue keyword strip; full-width layout | Was royal-blue box and dark-blue strip; now white box, royal-blue heading, royal-blue strip | Colours aligned (ADR-028); layout and "Popular keywords" wording are templates | Issue #2 fixed; layout Issue #3 |
+| Font family | Calibre (Light/Medium web fonts) | System font stack | Deliberate: no redistribution licence for Calibre (ADR-024) | Deliberate |
 | Body size and text colour | 1.063rem; CKAN `#333` | 1rem; brand black `#231f20` | Deliberate: Calibre's small x-height needed the larger size; brand black has higher contrast (14.55:1 on the surface) | Deliberate |
 | Heading scale | h1 32 px/500, h2 28 px/400, h3 21 px/300 black | CKAN sizes and weights, royal blue | Deliberate: the light weights were tuned for Calibre and look thin in system fonts; revisit if a licensed brand font is adopted | Deliberate |
-| Links | `a { color: inherit }`, no focus outline | Royal blue, prose underlined, focus outline | Deliberate (ADR-024) | Deliberate |
-| Active nav indicator | Teal underline (PIDINST) | Royal-blue underline | Deliberate: teal is 1.93:1 on the surface (ADR-024) | Deliberate |
+| Links | `a { color: inherit }`, no focus outline | Royal blue, prose underlined, focus outline | Deliberate (ADR-025) | Deliberate |
+| Active nav indicator | Teal underline (PIDINST) | Royal-blue underline | Deliberate: teal is 1.93:1 on the surface (ADR-025) | Deliberate |
 | Primary buttons | Royal blue, dark hover | Same | Matches | n/a |
-| Success and danger buttons | Royal blue / tangerine | Bootstrap semantics | Deliberate: white on tangerine is 3.46:1 (ADR-024) | Deliberate |
+| Success and danger buttons | Royal blue / tangerine | Bootstrap semantics | Deliberate: white on tangerine is 3.46:1 (ADR-025) | Deliberate |
 | Pagination active | CKAN teal `rgb(32, 107, 130)` | Royal blue | Deliberate brand consistency | Deliberate |
 | Facet headings, tag pills | CKAN `#f6f6f6`, royal-blue heading; pill `#f6f6f6` | Same (CKAN defaults with core heading colour) | Matches | n/a |
 | Resource format badges, activity stream | CKAN blue/teal | CKAN blue/teal | Deferred | Issue #4 |

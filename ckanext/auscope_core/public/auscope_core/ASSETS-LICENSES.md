@@ -40,7 +40,7 @@ Owner and terms: as for the AuScope logos above.
 ## Assumption
 
 AuScope has authorised use of these logos in this public package. This has not been
-confirmed; confirm with AuScope (also recorded in ADR-023).
+confirmed; confirm with AuScope (also recorded in ADR-024).
 
 ## Not included
 
