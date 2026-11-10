@@ -23,8 +23,11 @@
             {% endblock %}
           </div>
           <div class="col-md-6">
-            {% block featured_organization %}
-              {% snippet 'home/snippets/featured_organization.html' %}
+            {# Keep both CKAN homepage extension points while showing one card by default. #}
+            {% block featured_group %}
+              {% block featured_organization %}
+                {% snippet 'home/snippets/featured_organization.html' %}
+              {% endblock %}
             {% endblock %}
           </div>
         </div>

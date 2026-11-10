@@ -147,7 +147,8 @@ Available customisation points are:
   `header_account_notlogged` and `header_site_search` blocks remain available.
 - `auscope_footer_contact`, `auscope_footer_funding`,
   `auscope_footer_community` and `auscope_footer_acknowledgement` in `footer.html`.
-- `search`, `promoted` and `featured_organization` in `home/index.html`.
+- `search`, `promoted`, `featured_group` and `featured_organization` in
+  `home/index.html`.
 - CKAN's normal `secondary_content`, `primary_content`, `pre_primary`,
   `wrapper_class` and related page blocks for common pages.
 

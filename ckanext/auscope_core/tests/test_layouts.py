@@ -53,7 +53,7 @@ def test_templates_expose_consumer_customisation_blocks():
     assert "block auscope_header_repository_title" in header
     for name in ("contact", "funding", "community", "acknowledgement"):
         assert f"block auscope_footer_{name}" in footer
-    for name in ("search", "promoted", "featured_organization"):
+    for name in ("search", "promoted", "featured_group", "featured_organization"):
         assert f"block {name}" in home
 
 

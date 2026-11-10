@@ -599,7 +599,7 @@ Not verified: CI was not re-run; CKAN 2.11.4 and 2.10.1.
   - override only `footer_content` and expose `auscope_footer_*` blocks for the
     common contact, funding, community and acknowledgement sections;
   - override only the homepage `primary_content` geometry, retaining CKAN's
-    `search`, `promoted` and `featured_organization` blocks; and
+    `search`, `promoted`, `featured_group` and `featured_organization` blocks; and
   - do not override `page.html`; provide a namespaced `page_section` macro for
     reusable CKAN module markup instead.
 - Asset decision: the legacy NCRIS image remains excluded because no redistribution

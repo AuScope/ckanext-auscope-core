@@ -105,7 +105,7 @@ Current overrides and their deliberately small scope:
 | `base.html` | Include shared CSS after CKAN's bundle | `auscope_core_styles` |
 | `header.html` | Render `ckan.site_logo` beside `ckan.site_title` | AuScope brand blocks and CKAN's account/navigation/search blocks |
 | `footer.html` | Contact, NCRIS funding, community, acknowledgement, CKAN attribution and language selector | `auscope_footer_*` blocks |
-| `home/index.html` | Full-width search followed by two responsive content columns | CKAN's `search`, `promoted`, `featured_organization` |
+| `home/index.html` | Full-width search followed by two responsive content columns | CKAN's `search`, `promoted`, `featured_group`, `featured_organization` |
 
 `page.html` is intentionally not overridden. CKAN 2.12.1 already provides the
 skip link, breadcrumb, responsive primary/secondary columns and standard page
