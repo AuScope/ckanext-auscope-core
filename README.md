@@ -200,6 +200,38 @@ macro:
 {% endcall %}
 ```
 
+### Reusable UI components
+
+Use CKAN's built-in dataset/resource cards, organisation/group snippets and
+Bootstrap button, alert and badge classes by default. Core does not wrap those
+APIs. The reference review and exclusions are recorded in
+[docs/ui-component-analysis.md](docs/ui-component-analysis.md).
+
+Sample and PIDINST both need a compact multi-value facet in some searches. Core
+provides an opt-in, JavaScript-free version under its namespace:
+
+```jinja
+{% snippet 'snippets/auscope_core/facet_select.html',
+  name='tags',
+  title=_('Keywords'),
+  search_facets=search_facets,
+  hide_empty=true
+%}
+```
+
+Pass `items` instead of `search_facets` when a consumer already has facet items.
+Optional arguments are `action`, `query_args` (an iterable of key/value pairs),
+`label_function`, `count_label`, `select_label`, `help_text`, `apply_label`,
+`empty_message` and `classes`. The component keeps every current query value except
+its own facet and `page`, so applying a changed filter returns to the first result
+page. It uses a native multiple select and explicit submit button, works without
+JavaScript, and inherits Core's design tokens through Bootstrap classes.
+
+Consumers can override
+`snippets/auscope_core/facet_select.html` from their own template directory if the
+markup genuinely needs to differ. Data and RAiD should retain CKAN's native
+`snippets/facet_list.html` unless they establish the same multi-select use case.
+
 Data, Sample, PIDINST and RAiD should set their own `ckan.site_title`, override the
 navigation block with routes supplied by their plugins, and override only footer or
 homepage blocks whose content differs. The core intentionally does not provide AAF
@@ -291,7 +323,7 @@ ruff check .
 ```
 ckanext-auscope-core/
 ├── AGENTS.md                    # AI development instructions (canonical rules)
-├── docs/                        # architecture.md, decisions.md (ADR log), branding-analysis.md, design-baseline.md
+├── docs/                        # Architecture, decisions, baselines and analyses
 ├── .kiro/steering/              # Kiro steering files (point to AGENTS.md and docs/)
 ├── .github/workflows/test.yml   # CI: tests in ckan/ckan-dev:2.12.1, ruff lint
 ├── docker-compose.yml           # Development stack: CKAN, PostgreSQL, Solr, Redis
@@ -313,7 +345,7 @@ ckanext-auscope-core/
         │   ├── header.html      # Icon/title; preserves CKAN account/nav/search
         │   ├── footer.html      # Shared contact/funding/community content
         │   ├── home/index.html  # Full-width search and reusable lower columns
-        │   └── snippets/auscope_core/page_section.html
+        │   └── snippets/auscope_core/ # page_section and facet_select
         ├── public/auscope_core/
         │   ├── images/          # AuScope logos and favicon
         │   └── ASSETS-LICENSES.md
@@ -334,3 +366,5 @@ ckanext-auscope-core/
   repositories' branding (Issue #2)
 - [docs/design-baseline.md](docs/design-baseline.md): shared visual baseline and
   differences from the legacy sites
+- [docs/ui-component-analysis.md](docs/ui-component-analysis.md): Issue #4
+  comparison, extracted component and deliberate exclusions

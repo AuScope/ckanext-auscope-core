@@ -667,3 +667,50 @@ Edge, screen-reader output, consumer plugins integrated end to end, or the legac
 Sample record page (no public record link was available). Interactive Windows
 browser control timed out awaiting app approval; the headless Edge harness and
 captured screenshots completed the browser review instead.
+
+## ADR-031: Opt-in native facet selector; keep CKAN presentation defaults
+
+- Date: 2026-11-10. Status: Accepted.
+- Context: the Issue #4 review found that Sample and PIDINST have byte-identical
+  multi-select facet templates and JavaScript. Their implementation embeds CSS,
+  depends on Select2, initialises a module from an inline script and reloads the
+  page after a delay. Other apparent duplicates either copy CKAN templates or
+  contain collection, visibility, membership, schema, DOI, taxonomy, lifecycle or
+  other repository policy. CKAN 2.12.1 already supplies maintained dataset,
+  resource, organisation, group and link-facet snippets, while Bootstrap supplies
+  buttons, alerts and badges.
+- Decision: add one opt-in `snippets/auscope_core/facet_select.html` component for
+  the demonstrated Sample/PIDINST use case. Use a native multiple select in a GET
+  form with an explicit label, help text and submit button; preserve repeated query
+  values, drop the changed facet and pagination, and require no JavaScript. Keep
+  namespaced layout rules in `components.css`. Do not globally override CKAN's
+  facet or presentation snippets, copy the legacy JavaScript/vendor assets, or add
+  wrappers around Bootstrap components.
+- Consequences: Sample and PIDINST can delete a duplicated template and module when
+  they adopt Core, while Data and RAiD remain on CKAN's preferable link facets.
+  Product schemas and workflows remain outside Core. The control works without
+  JavaScript and adds no runtime dependency; a native multiple select is less
+  visually rich than Select2 but has a smaller upgrade and accessibility surface.
+
+## Verification record: Issue #4 (2026-11-10)
+
+Environment: Windows host; CKAN 2.12.1 on Python 3.14.10 in the existing
+`ckan-dev` container. All pytest and database-capable commands used
+`docker/ckan/test-env.sh` and therefore the dedicated `ckan_test`, `solr-test` and
+test Redis settings.
+
+| Check | Result |
+|---|---|
+| Isolated component tests | `3 passed in 4.53s` (final run) |
+| Complete guarded suite | `73 passed in 39.42s` |
+| Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
+| Wheel build | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 33 entries; includes `facet_select.html` and the component CSS |
+| Accessibility structure | Render test verifies associated label, described help text, native multi-select, selected state, explicit submit button and no inline script/style |
+| Responsive contract | Component CSS verifies full inline width, a usable minimum control height and grid layout; no fixed width or breakpoint-specific override |
+| Reference repositories | Data/Sample HEAD `2c10d5b` with its existing 8 status entries; PIDINST HEAD `974efdf` with its existing 10 status entries; no files changed by Issue #4 |
+
+Not verified: a live consumer integration (none yet calls the opt-in snippet), a
+manual screen-reader walkthrough, or browser rendering at named viewport sizes.
+The Windows browser-control host was unavailable, and Playwright is not installed
+on the host or in `ckan-dev`. CKAN 2.11.4 and 2.10.1 remain unverified under the
+project compatibility policy.

@@ -52,6 +52,10 @@ Never copy credentials or `.env` values from these repositories.
 - Keep repository navigation, authentication workflows, annual reporting links and
   homepage copy in consumer extensions; customise shared layouts through the
   documented CKAN and `auscope_*` blocks.
+- Keep reusable snippets under `templates/snippets/auscope_core/` and their CSS
+  under the `.auscope-core-*` namespace. Make them opt-in unless a global override
+  is proven necessary; prefer CKAN's maintained dataset, resource, organisation,
+  group, form and facet snippets.
 - Keep business logic and repository-specific schemas out of the shared extension.
 - Use maintainable Python code with clear tests.
 - Pin dependencies where appropriate.
@@ -128,6 +132,7 @@ Run from the repository root. See README.md for details.
 | Styling architecture and load order | `docs/architecture.md` ("Styling architecture") |
 | Theme customisation and visual check | `README.md` ("Theme and branding") |
 | Shared template customisation | `README.md` ("Shared templates and layouts") |
+| Reusable UI analysis and exclusions | `docs/ui-component-analysis.md` |
 | Asset licences and attribution | `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md` |
 | Reference-repository branding analysis | `docs/branding-analysis.md` |
 | Shared visual baseline and legacy differences | `docs/design-baseline.md` |

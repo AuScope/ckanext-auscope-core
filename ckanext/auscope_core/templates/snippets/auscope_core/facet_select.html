@@ -1,0 +1,62 @@
+{#
+An opt-in, progressively enhanced facet control for consumers that need the
+multi-select presentation established by the Sample and PIDINST repositories.
+
+Required: name, title, and either items or search_facets.
+Optional: action, query_args, label_function, count_label, hide_empty,
+          select_label, help_text, apply_label, empty_message, classes.
+
+query_args is an iterable of (key, value) pairs. When omitted, every current
+query value except this facet and the page number is preserved.
+#}
+{% set hide_empty = hide_empty|default(false) %}
+{% set facet_items = items if items is defined else h.get_facet_items_dict(name, search_facets|default(none)) %}
+{% if facet_items or not hide_empty %}
+  {% set control_id = 'auscope-core-facet-' ~ name|replace('_', '-')|replace(' ', '-') %}
+  {% set help_id = control_id ~ '-help' %}
+  {% set form_action = action|default(request.path) %}
+  {% set preserved_query = query_args|default(request.args.items(multi=true)) %}
+  <section class="module module-narrow module-shallow auscope-core-facet-select {{ classes|default('') }}">
+    <h2 class="module-heading" id="{{ control_id }}-heading">
+      <i class="fa fa-filter" aria-hidden="true"></i>
+      {{ title }}
+    </h2>
+    {% if facet_items %}
+      <form class="module-content auscope-core-facet-select__form"
+            action="{{ form_action }}"
+            method="get">
+        {% for key, value in preserved_query %}
+          {% if key != name and key != 'page' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endif %}
+        {% endfor %}
+        <label class="visually-hidden" for="{{ control_id }}">
+          {{ select_label|default(_('Filter by {title}').format(title=title)) }}
+        </label>
+        <select class="form-select auscope-core-facet-select__control"
+                id="{{ control_id }}"
+                name="{{ name }}"
+                multiple
+                aria-describedby="{{ help_id }}">
+          {% for item in facet_items %}
+            {% set label = label_function(item) if label_function is defined and label_function else item.display_name %}
+            {% set count = count_label(item.count) if count_label is defined and count_label else item.count %}
+            <option value="{{ item.name }}"{% if item.active %} selected{% endif %}>
+              {{ _('{label} ({count})').format(label=label, count=count) }}
+            </option>
+          {% endfor %}
+        </select>
+        <p class="form-text" id="{{ help_id }}">
+          {{ help_text|default(_('Choose one or more values, then apply the filters.')) }}
+        </p>
+        <button class="btn btn-primary" type="submit">
+          {{ apply_label|default(_('Apply filters')) }}
+        </button>
+      </form>
+    {% else %}
+      <p class="module-content empty">
+        {{ empty_message|default(_('There are no {facet_type} that match this search').format(facet_type=title)) }}
+      </p>
+    {% endif %}
+  </section>
+{% endif %}

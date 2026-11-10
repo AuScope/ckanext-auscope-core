@@ -78,6 +78,26 @@ Interfaces that may be added later, only for needs shared by all consumers:
 `ITemplateHelpers` (shared helpers), `IBlueprint` (shared pages),
 `IConfigDeclaration` (declared config options).
 
+## Reusable UI components
+
+Reusable markup lives under `templates/snippets/auscope_core/` and component CSS
+uses the `.auscope-core-*` namespace. Components are opt-in: Core does not override
+CKAN's dataset, resource, organisation, group, form or facet snippets globally.
+This keeps the default rendering on CKAN's maintained upgrade path and lets a
+consumer adopt a component at one explicit call site.
+
+The current components are:
+
+- `page_section.html`, a macro around CKAN's native module classes; and
+- `facet_select.html`, a native multi-select GET form extracted from the common
+  Sample/PIDINST need. It has no JavaScript or third-party dependency and keeps
+  repository-specific facet names and item sources in the caller.
+
+Consumer template paths take precedence when their plugin is listed before Core,
+so consumers may override a namespaced snippet. Prefer its documented parameters
+and consumer CSS first. See `docs/ui-component-analysis.md` for the comparison and
+the components deliberately left in CKAN or consumer extensions.
+
 ## Plugin order and template resolution
 
 CKAN searches template directories in plugin order: plugins listed earlier in
