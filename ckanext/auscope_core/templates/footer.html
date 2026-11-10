@@ -1,0 +1,78 @@
+{% ckan_extends %}
+
+{% block footer_content %}
+  <div class="row g-4 auscope-footer__main">
+    <section class="col-md-4" aria-labelledby="auscope-footer-contact-heading">
+      {% block auscope_footer_contact %}
+        <h2 id="auscope-footer-contact-heading" class="h3">{{ _('Contact') }}</h2>
+        <ul class="list-unstyled">
+          <li>
+            <a href="{{ h.url_for('home.about') }}">
+              {{ _('About {site_title}').format(site_title=g.site_title) }}
+            </a>
+          </li>
+          <li>
+            <a href="https://www.auscope.org.au/contact" target="_blank" rel="noopener noreferrer">
+              {{ _('Contact AuScope') }}
+              <span class="visually-hidden">{{ _('(opens in a new tab)') }}</span>
+            </a>
+          </li>
+        </ul>
+      {% endblock %}
+    </section>
+
+    <section class="col-md-4" aria-labelledby="auscope-footer-funding-heading">
+      {% block auscope_footer_funding %}
+        <h2 id="auscope-footer-funding-heading" class="h3">{{ _('Funding') }}</h2>
+        <p>
+          {% trans %}AuScope is enabled by the Australian Government through the National Collaborative Research Infrastructure Strategy (NCRIS).{% endtrans %}
+        </p>
+        <ul class="list-unstyled">
+          <li>
+            <a href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris" target="_blank" rel="noopener noreferrer">
+              {{ _('About NCRIS') }}
+              <span class="visually-hidden">{{ _('(opens in a new tab)') }}</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.auscope.org.au/ncris" target="_blank" rel="noopener noreferrer">
+              {{ _('AuScope and NCRIS') }}
+              <span class="visually-hidden">{{ _('(opens in a new tab)') }}</span>
+            </a>
+          </li>
+        </ul>
+      {% endblock %}
+    </section>
+
+    <section class="col-md-4" aria-labelledby="auscope-footer-community-heading">
+      {% block auscope_footer_community %}
+        <h2 id="auscope-footer-community-heading" class="h3">{{ _('Community') }}</h2>
+        <ul class="list-unstyled">
+          <li><a href="https://www.auscope.org.au/" target="_blank" rel="noopener noreferrer">{{ _('AuScope website') }}</a></li>
+          <li><a href="https://bsky.app/profile/auscope.bsky.social" target="_blank" rel="noopener noreferrer">{{ _('AuScope on Bluesky') }}</a></li>
+          <li><a href="https://www.instagram.com/auscopetoolkit/" target="_blank" rel="noopener noreferrer">{{ _('AuScope on Instagram') }}</a></li>
+          <li><a href="https://www.linkedin.com/company/auscope-limited" target="_blank" rel="noopener noreferrer">{{ _('AuScope on LinkedIn') }}</a></li>
+        </ul>
+      {% endblock %}
+    </section>
+  </div>
+
+  <div class="row g-4 auscope-footer__bottom">
+    <div class="col-lg-8">
+      {% block auscope_footer_acknowledgement %}
+        <p>
+          {% trans %}We acknowledge the Traditional Custodians of the lands on which our research infrastructure and teams are based around the nation, and pay our respects to their Elders past and present.{% endtrans %}
+        </p>
+        <p class="mb-0">{{ _('© AuScope Limited') }}</p>
+      {% endblock %}
+    </div>
+    <div class="col-lg-4 attribution">
+      {% block footer_attribution %}
+        <p>{{ _('Powered by') }} <a href="https://ckan.org/">CKAN</a></p>
+      {% endblock %}
+      {% block footer_lang %}
+        {% snippet "snippets/language_selector.html" %}
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}

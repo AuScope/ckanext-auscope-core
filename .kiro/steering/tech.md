@@ -8,8 +8,10 @@
   `ckan.favicon` defaults when CKAN's defaults are in effect). Add others (e.g.
   `ITemplateHelpers`, `IBlueprint`, `IConfigDeclaration`) only for needs shared by
   all consumers.
-- Templates: Jinja2 with `{% ckan_extends %}`; override the smallest block. The only
-  core override is `templates/base.html` (block `auscope_core_styles`).
+- Templates: Jinja2 with `{% ckan_extends %}`; override the smallest block. Shared
+  overrides are `base.html`, `header.html`, `footer.html` and `home/index.html`;
+  ordinary pages retain CKAN's `page.html`. Reusable snippets are namespaced under
+  `snippets/auscope_core/`.
 - Assets: Webassets library `auscope_core` in `assets/webassets.yml`; bundles are
   referenced as `auscope_core/<bundle>`: `auscope_core-tokens`, `auscope_core-css`
   (preloads tokens) and `auscope_core-js` (placeholder, not included).

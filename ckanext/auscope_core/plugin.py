@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 CKAN_DEFAULT_SITE_LOGO = "/base/images/ckan-logo.png"
 CKAN_DEFAULT_FAVICON = "/base/images/ckan.ico"
-AUSCOPE_SITE_LOGO = "/auscope_core/images/auscope-logo.png"
+AUSCOPE_SITE_LOGO = "/auscope_core/images/auscope-logo-icon.png"
 AUSCOPE_FAVICON = "/auscope_core/images/auscope-favicon.png"
 
 

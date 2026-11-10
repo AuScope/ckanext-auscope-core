@@ -1,0 +1,20 @@
+{% ckan_extends %}
+
+{#
+  Keep CKAN's account bar, responsive navigation and site search intact. Consumers
+  can replace this block or either nested AuScope block without copying the header.
+#}
+{% block header_logo %}
+  <a class="logo auscope-header-brand d-flex align-items-center gap-3"
+     href="{{ h.url_for('home.index') }}"
+     aria-label="{{ _('Navigate to Home - {site_title}').format(site_title=g.site_title) }}">
+    {% block auscope_header_brand_mark %}
+      {% if g.site_logo %}
+        <img src="{{ h.url_for_static_or_external(g.site_logo) }}" alt="">
+      {% endif %}
+    {% endblock %}
+    {% block auscope_header_repository_title %}
+      <span class="auscope-header-brand__title">{{ g.site_title }}</span>
+    {% endblock %}
+  </a>
+{% endblock %}

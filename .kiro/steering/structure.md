@@ -3,7 +3,7 @@
 ```
 ckanext/auscope_core/
 ├── plugin.py      # AuscopeCorePlugin; registers templates, public, assets
-├── templates/     # Shared Jinja templates and snippets; base.html (only core override)
+├── templates/     # Shared Jinja templates: base, header, footer, home layout and namespaced snippets
 ├── public/auscope_core/  # Served at /auscope_core/: images/ (logos, favicon),
 │                         # ASSETS-LICENSES.md
 ├── assets/        # Webassets library "auscope_core": webassets.yml, js/,

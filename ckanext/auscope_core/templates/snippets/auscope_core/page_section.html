@@ -1,0 +1,7 @@
+{# Import and call this macro from consumer templates; CKAN's module classes do the styling. #}
+{% macro page_section(title='', classes='') -%}
+  <section class="module auscope-page-section {{ classes }}">
+    {% if title %}<h2 class="module-heading">{{ title }}</h2>{% endif %}
+    <div class="module-content">{{ caller() }}</div>
+  </section>
+{%- endmacro %}

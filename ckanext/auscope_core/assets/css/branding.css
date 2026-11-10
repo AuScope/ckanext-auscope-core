@@ -42,9 +42,25 @@
   max-inline-size: 100%;
 }
 
+.masthead .auscope-header-brand {
+  color: var(--auscope-masthead-color);
+  text-decoration: none;
+}
+
+.masthead .auscope-header-brand__title {
+  color: var(--auscope-nav-active-color);
+  font-size: var(--auscope-header-title-size);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 @media (max-width: 575.98px) {
   .masthead .navbar .logo img {
     block-size: var(--auscope-logo-height-sm);
+  }
+
+  .masthead .auscope-header-brand__title {
+    font-size: var(--auscope-header-title-size-sm);
   }
 }
 
@@ -123,6 +139,12 @@
 .site-footer .small,
 .site-footer .attribution p {
   color: var(--auscope-footer-color);
+}
+
+.site-footer .auscope-footer__bottom {
+  border-block-start: 1px solid var(--auscope-footer-color);
+  margin-block-start: 2rem;
+  padding-block-start: 1.5rem;
 }
 
 /* Homepage search: light search box (CKAN sets white text on .module-search) */

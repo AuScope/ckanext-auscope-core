@@ -581,3 +581,56 @@ Windows host, Python 3.12.5, Podman 6.0.2, CKAN 2.12.1 in `ckan-dev`.
 | Reference repositories (`git rev-parse`, `git status --porcelain`) | ckan-docker HEAD `2c10d5b0`, 8 entries; PIDINST HEAD `974efdfd`, 10 entries: unchanged |
 
 Not verified: CI was not re-run; CKAN 2.11.4 and 2.10.1.
+
+## ADR-029: Native CKAN blocks are the shared layout API
+
+- Date: 2026-11-10. Status: Accepted.
+- Context: Data, Sample and PIDINST all use an icon/title header, repository-specific
+  navigation and a three-column AuScope footer. Their copied templates also replace
+  large parts of `page.html`, even though CKAN 2.12.1 already provides the required
+  skip link, breadcrumb and responsive primary/secondary grid.
+- Decision:
+  - use native `ckan.site_title` for the repository name and `ckan.site_logo` for
+    the mark; the AuScope default logo changes from the full wordmark to its icon,
+    and `.env.example` supplies an explicit development-only site title;
+  - keep CKAN's account controls, responsive menu, site search and navigation
+    blocks, so consumer extensions override `header_site_navigation_tabs` for
+    product routes and `header_account_notlogged` for AAF/contact workflows;
+  - override only `footer_content` and expose `auscope_footer_*` blocks for the
+    common contact, funding, community and acknowledgement sections;
+  - override only the homepage `primary_content` geometry, retaining CKAN's
+    `search`, `promoted` and `featured_organization` blocks; and
+  - do not override `page.html`; provide a namespaced `page_section` macro for
+    reusable CKAN module markup instead.
+- Asset decision: the legacy NCRIS image remains excluded because no redistribution
+  permission was found. The footer provides the NCRIS attribution and official
+  links as text. A consumer with an approved image can override
+  `auscope_footer_funding` and must add the asset to `ASSETS-LICENSES.md`.
+- Consequences: consumers customise shared layouts without copying them, while
+  repository routes, homepage copy and workflows remain outside the core. The
+  upgrade surface is three focused layout overrides plus `base.html`, rather than a
+  copied `page.html`.
+
+## Verification record: Issue #3 (2026-11-10)
+
+Environment: Windows host, Python 3.12.5, Podman 6.0.2; `ckan-dev` runs CKAN
+2.12.1 on Python 3.14.10. Browser: Microsoft Edge through Playwright 1.64.1.
+
+| Check | Result |
+|---|---|
+| Guarded test DB initialisation | `sh docker/ckan/test-env.sh ckan -c test.ini db init`: `Upgrading DB: SUCCESS` |
+| Full guarded suite | `66 passed in 41.19s`; repeated after seeding the development dataset: `66 passed in 33.19s` |
+| Development-data isolation | `auscope-branding-check` kept ID `884877d4-2a6a-40aa-bbfc-71d164ac6932` before and after the guarded suite |
+| Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
+| Wheel | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 31 entries; includes all five shared templates and four CSS files |
+| HTTP pages and internal navigation destinations | `/`, `/dataset`, `/organization`, `/group`, `/about`, `/user/login` and the demo dataset all returned 200 |
+| Edge at 1280×900 and 375×800 | 92 of 92 checks passed across home, dataset list/detail, login and about; keyboard-opened mobile menu, focus outlines, full-width search, responsive footer and theme overflow checks passed; 0 console errors, page errors or responses at least 400 |
+| Screenshot review against legacy captures | Shared icon/title header, full-width search, two-column home content and stacked mobile footer align; NCRIS is deliberately text-only (ADR-029) |
+| Reference repositories | Data/Sample HEAD `2c10d5b`; PIDINST HEAD `974efdf`; their pre-existing status entries were unchanged |
+
+The development Compose stack remains running for manual review at
+`http://localhost:5000`. Not verified: CKAN 2.11.4 or 2.10.1, browsers other than
+Edge, screen-reader output, consumer plugins integrated end to end, or the legacy
+Sample record page (no public record link was available). Interactive Windows
+browser control timed out awaiting app approval; the headless Edge harness and
+captured screenshots completed the browser review instead.

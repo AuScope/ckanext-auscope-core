@@ -124,6 +124,7 @@ Run from the repository root. See README.md for details.
 | Theme tokens (customisation API) | `ckanext/auscope_core/assets/css/tokens.css` |
 | Styling architecture and load order | `docs/architecture.md` ("Styling architecture") |
 | Theme customisation and visual check | `README.md` ("Theme and branding") |
+| Shared template customisation | `README.md` ("Shared templates and layouts") |
 | Asset licences and attribution | `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md` |
 | Reference-repository branding analysis | `docs/branding-analysis.md` |
 | Shared visual baseline and legacy differences | `docs/design-baseline.md` |

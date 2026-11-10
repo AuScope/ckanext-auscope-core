@@ -3,10 +3,10 @@ Shared CKAN extension providing AuScope branding, themes, reusable UI components
 
 ## Status
 
-Shared styling and branding ([Issue #2](https://github.com/AuScope/ckanext-auscope-core/issues/2)).
-Enabling the plugin applies the AuScope colours, typography, focus styles, logo and
-favicon on top of CKAN's own templates and CSS. The shared header, footer and page
-layout are [Issue #3](https://github.com/AuScope/ckanext-auscope-core/issues/3).
+Shared branding, header, footer and layouts ([Issue #2](https://github.com/AuScope/ckanext-auscope-core/issues/2),
+[Issue #3](https://github.com/AuScope/ckanext-auscope-core/issues/3)).
+Enabling the plugin applies AuScope colours, typography, focus styles, repository
+branding and responsive layouts on top of CKAN's templates and CSS.
 
 Consumers: AuScope Data Repository, Sample Repository, Instrument Registry (PIDINST)
 and the RAiD Repository.
@@ -52,15 +52,16 @@ The extension adds no configuration options. It changes the defaults of two CKAN
 core options:
 
 - `ckan.site_logo`: if it is CKAN's default `/base/images/ckan-logo.png`, it becomes
-  `/auscope_core/images/auscope-logo.png`.
+  `/auscope_core/images/auscope-logo-icon.png`.
 - `ckan.favicon`: if it is CKAN's default `/base/images/ckan.ico`, it becomes
   `/auscope_core/images/auscope-favicon.png`.
 
-Any other value is kept, including an empty `ckan.site_logo` (CKAN then shows the
-site title as text), values from `CKAN__SITE_LOGO` / `CKAN__FAVICON` and values set
-in the sysadmin config UI. CKAN-generated configs set the default paths explicitly,
-so the rule compares values rather than checking whether the key is set. To keep
-CKAN's logo, set any other path.
+Any other value is kept, including an empty `ckan.site_logo` (the header then shows
+the repository title without a mark), values from `CKAN__SITE_LOGO` /
+`CKAN__FAVICON` and values set in the sysadmin config UI. CKAN-generated configs set
+the default paths explicitly, so the rule compares values rather than checking
+whether the key is set. The repository title is CKAN's native `ckan.site_title`
+option; no duplicate AuScope setting is required.
 
 ## Theme and branding
 
@@ -114,15 +115,68 @@ Shipped images are served from `/auscope_core/images/`: `auscope-logo.png`,
 `ckanext/auscope_core/public/auscope_core/ASSETS-LICENSES.md`. The Calibre font is
 not shipped (no redistribution licence); the base font is a system font stack.
 
+## Shared templates and layouts
+
+The shared header keeps CKAN's account controls, responsive menu and site search.
+It combines `ckan.site_logo` with `ckan.site_title`. The footer supplies common
+contact, NCRIS funding, AuScope community and acknowledgement content while keeping
+CKAN's language selector. The homepage places the CKAN search across the full
+container and leaves the two lower columns available through CKAN's `promoted` and
+`featured_organization` blocks. Ordinary pages continue to use CKAN's unmodified
+`page.html`, including its skip link, breadcrumb and responsive sidebar.
+
+Consumers list their plugin before `auscope_core` and extend only the block they
+need. Repository routes and login/contact workflows stay in the consumer. For
+example:
+
+```jinja
+{% ckan_extends %}
+
+{% block header_site_navigation_tabs %}
+  {{ h.build_nav_main(
+    ('dataset.search', _('Records'), ['dataset', 'resource']),
+    ('home.about', _('About'))
+  ) }}
+{% endblock %}
+```
+
+Available customisation points are:
+
+- `auscope_header_brand_mark` and `auscope_header_repository_title` in
+  `header.html`; the standard CKAN `header_site_navigation_tabs`,
+  `header_account_notlogged` and `header_site_search` blocks remain available.
+- `auscope_footer_contact`, `auscope_footer_funding`,
+  `auscope_footer_community` and `auscope_footer_acknowledgement` in `footer.html`.
+- `search`, `promoted` and `featured_organization` in `home/index.html`.
+- CKAN's normal `secondary_content`, `primary_content`, `pre_primary`,
+  `wrapper_class` and related page blocks for common pages.
+
+For a CKAN-styled content section without copying module markup, import the shared
+macro:
+
+```jinja
+{% from 'snippets/auscope_core/page_section.html' import page_section %}
+{% call page_section(_('Repository guidance')) %}
+  <p>Repository-specific content goes here.</p>
+{% endcall %}
+```
+
+Data, Sample, PIDINST and RAiD should set their own `ckan.site_title`, override the
+navigation block with routes supplied by their plugins, and override only footer or
+homepage blocks whose content differs. The core intentionally does not provide AAF
+routes, contact forms, instrument/platform routes, reporting-year links or
+repository-specific homepage copy.
+
 ### Visual check
 
 With the development stack running:
 
-1. Open http://localhost:5000/, `/dataset`, `/user/login` and `/about`. Expect a
-   light grey masthead with the AuScope logo and a teal line under it, a light grey
-   page background, a white homepage search box above a royal-blue "Popular tags"
-   strip, and a grey footer with royal-blue text. The intended look is described in
-   [docs/design-baseline.md](docs/design-baseline.md).
+1. Set `CKAN__SITE_TITLE=AuScope Data Repository` (or another repository name),
+   then open http://localhost:5000/, `/dataset`, `/user/login` and `/about`. Expect a
+   light grey masthead with the AuScope icon and title and a teal line under it, a
+   full-width white homepage search box above a royal-blue "Popular tags" strip,
+   and a three-column grey footer with royal-blue text. The intended look is
+   described in [docs/design-baseline.md](docs/design-baseline.md).
 2. Press Tab to see focus rings and the skip link. Outlines are royal blue, except
    on "Popular tags" (white on blue); on the search submit button the outline is
    inside the button.
@@ -215,7 +269,11 @@ ckanext-auscope-core/
     └── auscope_core/
         ├── plugin.py            # AuscopeCorePlugin (IConfigurer, logo/favicon defaults)
         ├── templates/
-        │   └── base.html        # Only core override: includes the shared CSS
+        │   ├── base.html        # Includes the shared CSS
+        │   ├── header.html      # Icon/title; preserves CKAN account/nav/search
+        │   ├── footer.html      # Shared contact/funding/community content
+        │   ├── home/index.html  # Full-width search and reusable lower columns
+        │   └── snippets/auscope_core/page_section.html
         ├── public/auscope_core/
         │   ├── images/          # AuScope logos and favicon
         │   └── ASSETS-LICENSES.md

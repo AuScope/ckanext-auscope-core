@@ -15,7 +15,7 @@ frontend functionality.
 Out of scope: business logic, repository-specific schemas and metadata, CKAN core
 changes. These stay in each repository's own extensions.
 
-Current status: shared styling and branding (Issue #2). The shared header, footer
-and page layout are Issue #3; UI components follow in later issues.
+Current status: shared styling and branding (Issue #2), with shared header, footer
+and page layouts in Issue #3. UI components follow in later issues.
 
 Rules: see AGENTS.md.

@@ -118,7 +118,10 @@ def test_custom_logo_and_favicon_kept(app):
 def test_empty_logo_shows_text_title(app):
     soup = _soup(app)
     assert soup.select(".masthead .logo img") == []
-    titles = [h1.get_text(strip=True) for h1 in soup.select(".masthead h1")]
+    titles = [
+        title.get_text(strip=True)
+        for title in soup.select(".masthead .auscope-header-brand__title")
+    ]
     assert tk.config["ckan.site_title"] in titles
 
 
@@ -132,3 +135,14 @@ def test_homepage_search_headings_rendered(app):
     ]
     assert "Search data" in headings
     assert "Popular tags" in headings
+
+
+@pytest.mark.ckan_config("ckan.plugins", "auscope_core")
+@pytest.mark.ckan_config("ckan.site_title", "AuScope RAiD Repository")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_repository_title_uses_native_site_title(app):
+    soup = _soup(app)
+    brand = soup.select_one(".auscope-header-brand")
+    assert brand.get_text(" ", strip=True) == "AuScope RAiD Repository"
+    assert brand["href"] == "/"
+    assert brand.select_one("img")["alt"] == ""

@@ -97,8 +97,21 @@ ckan.plugins = <repository_theme> auscope_core <other plugins> envvars
 - Put reusable shared snippets under `templates/snippets/auscope_core/` so their
   names cannot clash with core or consumer snippets.
 - Keep core template overrides few; each one adds upgrade work.
-- `templates/base.html` is currently the only core override (see "Styling
-  architecture").
+
+Current overrides and their deliberately small scope:
+
+| Template | Shared responsibility | Consumer extension points |
+|---|---|---|
+| `base.html` | Include shared CSS after CKAN's bundle | `auscope_core_styles` |
+| `header.html` | Render `ckan.site_logo` beside `ckan.site_title` | AuScope brand blocks and CKAN's account/navigation/search blocks |
+| `footer.html` | Contact, NCRIS funding, community, acknowledgement, CKAN attribution and language selector | `auscope_footer_*` blocks |
+| `home/index.html` | Full-width search followed by two responsive content columns | CKAN's `search`, `promoted`, `featured_organization` |
+
+`page.html` is intentionally not overridden. CKAN 2.12.1 already provides the
+skip link, breadcrumb, responsive primary/secondary columns and standard page
+blocks. Consumers use those blocks directly. The
+`snippets/auscope_core/page_section.html` macro provides reusable CKAN `module`,
+`module-heading` and `module-content` markup for repository-specific pages.
 
 ## Static files and Webassets
 
@@ -148,15 +161,19 @@ The intended look (surfaces, footer, homepage search, typography) and the
 deliberate differences from the legacy sites are in
 [design-baseline.md](design-baseline.md).
 
-Consumers customise by overriding tokens in a later-loaded bundle, by
+Consumers customise styling by overriding tokens in a later-loaded bundle, by
 `ckan.site_custom_css`, by overriding `auscope_core_styles`, or through
 `ckan.site_logo` / `ckan.favicon` (README "Theme and branding"). Brand assets and
 their licences are listed in `public/auscope_core/ASSETS-LICENSES.md`.
 
 ## Configuration
 
-No configuration options of its own; the plugin only changes the defaults of
-`ckan.site_logo` and `ckan.favicon` (see Plugin). Future options must be declared through CKAN's config
+No configuration options of its own. The plugin changes the defaults of
+`ckan.site_logo` (to the AuScope icon) and `ckan.favicon` only when CKAN's defaults
+are still in effect. The shared header uses CKAN's `ckan.site_title` for the
+repository name. Navigation and repository-specific content are template blocks,
+because their destinations belong to consumer plugins rather than configuration
+data. Future AuScope-specific options must be declared through CKAN's config
 declaration (`IConfigDeclaration`) with the `ckanext.auscope_core.` prefix.
 
 ## Out of scope
@@ -174,7 +191,9 @@ over the same path at `/srv/app/src_extensions/ckanext-auscope-core`.
 `docker/postgres/initdb`
 creates the CKAN role and the `ckan_default` and `ckan_test` databases. Configuration
 comes from `.env` (copied from `.env.example`) through the image's environment
-variable support and ckanext-envvars.
+variable support and ckanext-envvars. The example sets `CKAN__SITE_TITLE` to an
+explicit development title so the shared icon/title header is visible immediately;
+consumer deployments replace it with their repository name.
 The database initialisation script passes role names and passwords through psql
 variables with identifier/literal quoting. Connection URLs must still percent-encode
 reserved characters in passwords.
@@ -195,8 +214,10 @@ bundle registration, the rendered stylesheet order, that the CSS and images are
 served, and the logo and favicon default rule. `test_theme_css.py` is pure Python:
 token definitions, contrast pairs, `-rgb` triplets, dark-surface and focus rules,
 and licence entries for every image. CI rewrites the hostname to its own test-only
-`solr` service, installs the built package non-editably, verifies its entry point
-and packaged runtime directories, runs the installed suite in
+`solr` service. `test_layouts.py` renders the home, dataset list, dataset detail and
+login pages; checks the common landmarks and responsive grid; and verifies the
+consumer block and macro contracts. CI installs the built package non-editably,
+verifies its entry point and packaged runtime directories, runs the installed suite in
 `ckan/ckan-dev:2.12.1`, and lints with ruff.
 
 Only CKAN 2.12.1 has been exercised so far. Issue #5 contains the planned

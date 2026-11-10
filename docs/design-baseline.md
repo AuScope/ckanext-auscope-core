@@ -35,11 +35,11 @@ PIDINST's fork). The three live sites render the same palette and surfaces.
 |---|---|---|---|---|
 | Footer colour | Grey `#d8d9d7`, royal-blue text | Was royal blue with white text; now grey with royal-blue text | Aligned (ADR-028) | Issue #2, fixed |
 | Footer muted text | `#7e7caa` on grey (2.77:1) | Not provided | Deliberate: fails WCAG AA; footer content is Issue #3 | Issue #3 |
-| Footer content | Contact, funding, NCRIS logo, socials, acknowledgement | CKAN's default footer | Deferred | Issue #3 |
+| Footer content | Contact, funding, NCRIS logo, socials, acknowledgement | Three accessible columns for contact, NCRIS funding and community links, plus acknowledgement, text CKAN attribution and language selector | Shared content aligned; NCRIS image excluded because redistribution permission was not established | Issue #3 |
 | Masthead background | `#f2f2f1`, no border | Was white; now `#f2f2f1` with a teal line | Colour aligned (ADR-028); teal line kept as the brand accent | Issue #2, fixed |
-| Header logo and title | Icon plus repository name text | Full wordmark via `ckan.site_logo` | Deferred: repository names are configurable header content | Issue #3 |
+| Header logo and title | Icon plus repository name text | `ckan.site_logo` icon plus native `ckan.site_title` | Aligned without duplicate configuration | Issue #3 |
 | Nav link size | 1.2rem | CKAN size | Deferred with the header | Issue #3 |
-| Homepage search box | White box, black heading, royal-blue keyword strip; full-width layout | Was royal-blue box and dark-blue strip; now white box, royal-blue heading, royal-blue strip | Colours aligned (ADR-028); layout and "Popular keywords" wording are templates | Issue #2 fixed; layout Issue #3 |
+| Homepage search box | White box, black heading, royal-blue keyword strip; full-width layout | White box, royal-blue heading and keyword strip; full-width layout; CKAN's accessible "Popular tags" wording | Colours and geometry aligned; CKAN terminology and tag route retained | Issues #2 and #3 |
 | Font family | Calibre (Light/Medium web fonts) | System font stack | Deliberate: no redistribution licence for Calibre (ADR-024) | Deliberate |
 | Body size and text colour | 1.063rem; CKAN `#333` | 1rem; brand black `#231f20` | Deliberate: Calibre's small x-height needed the larger size; brand black has higher contrast (14.55:1 on the surface) | Deliberate |
 | Heading scale | h1 32 px/500, h2 28 px/400, h3 21 px/300 black | CKAN sizes and weights, royal blue | Deliberate: the light weights were tuned for Calibre and look thin in system fonts; revisit if a licensed brand font is adopted | Deliberate |
@@ -63,8 +63,8 @@ that selector, per the dark-surface rule in `AGENTS.md`.
 
 ## Known limitations
 
-- CKAN's default footer shows a white "Powered by ckan" image that is faint on the
-  grey footer. Logos are exempt from WCAG contrast requirements, and Issue #3
-  replaces the footer content.
+- The footer uses text for NCRIS funding rather than shipping the legacy NCRIS
+  image because no redistribution permission was found. Consumers may add an
+  approved asset by overriding `auscope_footer_funding` and recording its licence.
 - No live Sample record page was captured: the capture script found no dataset link
   on the Sample list page. Its home and list pages match the Data Repository.
