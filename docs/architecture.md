@@ -11,6 +11,11 @@ AuScope CKAN versions where the shared implementation can be verified.
 Consumers: Data Repository, Sample Repository, Instrument Registry (PIDINST),
 RAiD Repository.
 
+The reference-repository extension inventory, optional capability profiles and
+upgrade-test workflow are in
+[extension-compatibility.md](extension-compatibility.md). Core deliberately does
+not install or activate those optional extensions.
+
 ## Layering
 
 ```
@@ -245,7 +250,8 @@ consumer block and macro contracts. CI installs the built package non-editably,
 verifies its entry point and packaged runtime directories, runs the installed suite in
 `ckan/ckan-dev:2.12.1`, and lints with ruff.
 
-Only CKAN 2.12.1 has been exercised so far. Issue #5 contains the planned
-multi-version matrix. CKAN 2.11.4 and 2.10.1 remain unverified until their matrix
-jobs or migration evaluation run successfully; documentation and release metadata
-must not imply otherwise.
+Only CKAN 2.12.1 has been exercised so far. CKAN 2.11.4 and 2.10.1 remain
+unverified until their exact-version integration suites or migration evaluations
+run successfully; documentation and release metadata must not imply otherwise.
+Optional extension combinations are tested in consumer or deployment integration
+profiles, not installed in Core's isolated CI image.

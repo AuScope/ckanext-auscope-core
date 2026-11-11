@@ -714,3 +714,46 @@ manual screen-reader walkthrough, or browser rendering at named viewport sizes.
 The Windows browser-control host was unavailable, and Playwright is not installed
 on the host or in `ckan-dev`. CKAN 2.11.4 and 2.10.1 remain unverified under the
 project compatibility policy.
+
+## ADR-032: Optional extension profiles stay outside Core dependencies
+
+- Date: 2026-11-10. Status: Accepted.
+- Context: Data, Sample and PIDINST install a similar but inconsistent set of
+  Scheming, composite, spatial, DOI, DCAT, contact, storage and authentication
+  extensions. Most sources float on branches, while PIDINST alone needs group
+  Scheming and taxonomy. Their schemas, validators, credentials and lifecycle
+  policies are repository-specific.
+- Decision: keep Core's runtime dependency list empty beyond CKAN. Coordinate exact
+  third-party releases/commits through capability-based constraints in deployment
+  tooling, and record only combinations that pass exact-version integration tests.
+  Keep Scheming YAML and domain configuration in consumer extensions. Test Core in
+  isolation on CKAN 2.12.1; test optional combinations in consumer/integration
+  profiles using isolated database, Solr and Redis services. The full inventory and
+  workflow are in `docs/extension-compatibility.md`.
+- Consequences: no repository is forced to install unused plugins, and a Core theme
+  update cannot silently change a database or publishing extension. Migration work
+  must first replace floating sources with reviewed immutable pins. The current
+  Data/Sample/PIDINST stacks and CKAN 2.11.4/2.10.1 combinations remain unverified.
+
+## Verification record: Issue #5 inventory and Core compatibility (2026-11-11)
+
+Environment: Windows host with Podman 6.0.2; `ckan-dev` runs CKAN 2.12.1 on
+Python 3.14.10. All database-capable commands used `docker/ckan/test-env.sh` and
+the dedicated `ckan_test`, `solr-test` and test Redis settings.
+
+| Check | Result |
+|---|---|
+| Start point | fetched `origin/main` at `f8cff21`; created `feature/5-extension-compatibility` |
+| Reference inventory | Data/Sample CKAN 2.10.1 at `2c10d5b`; PIDINST CKAN 2.11.4 at `974efdf`; Dockerfiles, safe config keys/plugin lists, startup scripts, package metadata and Scheming YAML inspected read-only |
+| Guarded test DB initialisation | `ckan -c test.ini db init`: `Upgrading DB: SUCCESS`; database remained at CKAN head `9445ce34fc23` |
+| Complete guarded suite | `73 passed in 27.87s` on CKAN 2.12.1 |
+| Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
+| Wheel from a disposable container copy | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 82,788 bytes; SHA-256 `26bab7650768ccfa19de45a7b8f2aa2549a8a2f5387eaac8372a0ff2f8dd0703` |
+| Reference repositories after analysis | unchanged: Data/Sample `2c10d5b` with 8 pre-existing status entries; PIDINST `974efdf` with 10 pre-existing entries |
+
+The existing GitHub Actions workflow was reviewed and already covers the Issue #5
+Core-only requirements: exact CKAN 2.12.1, non-editable installation, template
+inheritance/rendering, Webassets registration/order/serving and reusable components.
+No CI or test code was added merely to duplicate this coverage. The remote workflow
+was not run because this branch was not pushed. Consumer stacks, AuScope extension
+forks, CKAN 2.11.4 and CKAN 2.10.1 remain unverified.

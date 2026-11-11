@@ -17,6 +17,12 @@ and the RAiD Repository.
 - Python 3.10 or newer (the development image uses Python 3.14)
 - Docker or Podman with Compose, for the development environment
 
+Core has no runtime dependency on other CKAN extensions. Scheming, spatial, DOI,
+DCAT, contact, taxonomy, storage, authentication and loaders are optional consumer
+capabilities. The current repository inventory, compatibility limitations and
+recommended profile-based management are documented in
+[docs/extension-compatibility.md](docs/extension-compatibility.md).
+
 ## Installation
 
 Install into the Python environment of an existing CKAN 2.12.1 instance:
