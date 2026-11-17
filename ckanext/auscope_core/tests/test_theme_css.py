@@ -238,10 +238,29 @@ def test_light_homepage_search_box_sets_its_text_colour():
     )
 
 
-def test_body_uses_footer_background_below_short_pages():
+def test_page_uses_normal_flow_flex_sticky_footer():
+    body = _blocks("base.css", "body")
+    assert len(body) == 1
+    assert body[0]["display"] == "flex"
+    assert body[0]["flex-direction"] == "column"
+    assert body[0]["min-block-size"] == "100dvh"
+
+    # Keep the vh fallback immediately before dvh for browsers without dynamic
+    # viewport units. The parser above intentionally retains the last value.
+    assert "min-block-size: 100vh;\n  min-block-size: 100dvh;" in _css("base.css")
+
+    footer = _blocks("base.css", "body > .site-footer")
+    assert len(footer) == 1
+    assert footer[0]["margin-block-start"] == "auto"
+    assert footer[0]["flex-shrink"] == "0"
+    assert "position" not in footer[0]
+    assert "block-size" not in footer[0]
+
+
+def test_body_uses_page_surface_behind_sticky_footer_space():
     blocks = _blocks("branding.css", "body")
     assert len(blocks) == 1
-    assert blocks[0]["background-color"] == "var(--auscope-footer-bg)"
+    assert blocks[0]["background-color"] == "var(--auscope-color-surface)"
 
 
 def test_footer_labels_use_consumer_supplied_medium_family():

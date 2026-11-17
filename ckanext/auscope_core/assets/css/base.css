@@ -22,6 +22,26 @@
   --bs-focus-ring-color: rgba(var(--auscope-color-primary-rgb), .25);
 }
 
+/*
+ * CKAN page.html renders the account bar, header, page content and footer as
+ * direct body children. An auto block-start margin on the footer consumes only
+ * spare viewport space; on long pages everything remains in normal document
+ * flow. The dvh declaration corrects mobile browser chrome resizing, while vh
+ * remains the fallback for older browsers.
+ */
+body {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+}
+
+body > .site-footer {
+  flex-shrink: 0;
+  inline-size: 100%;
+  margin-block-start: auto;
+}
+
 /* Established AuScope type scale. Font files are supplied by licensed consumers. */
 h1,
 h2,

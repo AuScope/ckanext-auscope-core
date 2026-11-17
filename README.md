@@ -166,6 +166,12 @@ container and leaves the two lower columns available through CKAN's `promoted` a
 `featured_organization` blocks. Ordinary pages continue to use CKAN's unmodified
 `page.html`, including its skip link, breadcrumb and responsive sidebar.
 
+The shared CSS treats CKAN's `body` as a minimum-viewport-height flex column. The
+footer remains in normal document flow, but its automatic block-start margin moves
+it to the viewport bottom when a page is short. Long pages grow normally, and the
+same Bootstrap `.container` widths continue across the header, ordinary content,
+homepage sections and footer.
+
 Consumers list their plugin before `auscope_core` and extend only the block they
 need. Repository routes and login/contact workflows stay in the consumer. For
 example:

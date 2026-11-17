@@ -635,8 +635,14 @@ Not verified: CI was not re-run; CKAN 2.11.4 and 2.10.1.
     card metrics through existing token and CSS layers;
   - ship no font binaries and no `@font-face` URLs; a licensed consumer supplies
     those declarations in its own bundle;
-  - set the `body` background directly to the footer token so short pages remain
-    grey below the footer, without changing Bootstrap's `--bs-body-bg`; and
+  - initially set the `body` background directly to the footer token so short pages
+    remained grey below the footer without changing Bootstrap's `--bs-body-bg`;
+    the 2026-11-17 layout review supersedes this masking workaround by making
+    CKAN's direct-child page structure a minimum-viewport column flex layout,
+    giving the normal-flow footer an automatic block-start margin, and using the
+    page-surface token behind genuine spare space. `100vh` is retained as the
+    fallback before `100dvh`; CKAN/Bootstrap containers and grids remain the only
+    content-width system; and
   - retain Core's focus indicators, underlined prose links, contrast-safe footer
     text, semantic button variants and royal-blue active-nav indicator.
 - Consequences: deployments with licensed Calibre files match the established type

@@ -60,7 +60,7 @@ PIDINST's fork). The three live sites render the same palette and surfaces.
 | Facet headings, tag pills | CKAN `#f6f6f6`, royal-blue heading; pill `#f6f6f6` | Same (CKAN defaults with core heading colour) | Matches | n/a |
 | Resource format badges, activity stream | CKAN blue/teal | CKAN blue/teal | Deferred | Issue #4 |
 | Cards, composite fields, instrument cards, schema tables, stages | Legacy component CSS | Not provided | Deferred or repository-specific | Issue #4 / consumer |
-| Body background below the footer | `#d8d9d7` | `#d8d9d7` | Aligned by styling `body` directly without mapping `--bs-body-bg` | Issue #3 |
+| Short-page footer | Grey body continued below an early footer | Footer sits at the viewport bottom; spare space before it uses the page surface | Deliberate correction: normal-flow flex layout avoids false footer-coloured whitespace | Layout consistency |
 
 ## Customising the homepage search
 

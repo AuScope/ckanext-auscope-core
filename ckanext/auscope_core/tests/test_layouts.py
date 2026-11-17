@@ -10,16 +10,16 @@ PACKAGE_DIR = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = PACKAGE_DIR / "templates"
 
 
-def _soup(app, url):
-    response = app.get(url)
-    assert response.status_code == 200, url
+def _soup(app, url, status=200, **kwargs):
+    response = app.get(url, status=status, **kwargs)
+    assert response.status_code == status, url
     return BeautifulSoup(response.body, "html.parser")
 
 
 @pytest.mark.ckan_config("ckan.plugins", "auscope_core")
-@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
 def test_header_and_footer_render_on_common_pages(app):
-    dataset = factories.Dataset()
+    dataset = factories.Dataset(type="dataset")
     for url in ("/", "/dataset", f"/dataset/{dataset['name']}", "/user/login"):
         soup = _soup(app, url)
         assert soup.select_one("header.masthead .auscope-header-brand")
@@ -44,6 +44,55 @@ def test_homepage_uses_full_width_search_and_two_column_content(app):
     assert hero.select_one(":scope > .container > .module-search")
     columns = soup.select(".homepage .module-feeds .row > .col-md-6")
     assert len(columns) == 2
+
+
+@pytest.mark.ckan_config("ckan.plugins", "auscope_core")
+@pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
+def test_ckan_page_variants_keep_content_before_direct_body_footer(app):
+    dataset = factories.Dataset(type="dataset")
+    organization = factories.Organization()
+    pages = (
+        ("/", 200),
+        ("/dataset", 200),
+        (f"/dataset/{dataset['name']}", 200),
+        ("/organization", 200),
+        (f"/organization/{organization['name']}", 200),
+        ("/user/login", 200),
+        ("/auscope-core-layout-missing-page", 404),
+    )
+
+    for url, status in pages:
+        body = _soup(app, url, status=status).body
+        direct_children = body.find_all(recursive=False)
+        footer = body.select_one(":scope > footer.site-footer")
+        content = next(
+            (
+                child
+                for child in direct_children
+                if "main" in child.get("class", [])
+                or "homepage" in child.get("class", [])
+                or child.get("role") == "main"
+            ),
+            None,
+        )
+        assert content is not None, url
+        assert footer is not None, url
+        assert direct_children.index(content) < direct_children.index(footer), url
+
+
+@pytest.mark.ckan_config("ckan.plugins", "auscope_core")
+@pytest.mark.ckan_config("ckan.auth.create_unowned_dataset", True)
+@pytest.mark.ckan_config("ckan.auth.create_dataset_if_not_in_organization", True)
+@pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
+def test_create_and_edit_forms_use_standard_page_layout(app):
+    user = factories.UserWithToken()
+    dataset = factories.Dataset(user=user, type="dataset")
+    headers = {"Authorization": user["token"]}
+
+    for url in ("/dataset/new", f"/dataset/edit/{dataset['name']}"):
+        soup = _soup(app, url, headers=headers)
+        assert soup.select_one("body > .main form#dataset-edit"), url
+        assert soup.select_one("body > footer.site-footer"), url
 
 
 def test_templates_expose_consumer_customisation_blocks():

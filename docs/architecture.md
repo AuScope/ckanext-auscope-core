@@ -156,7 +156,7 @@ The theme is plain CSS layered over CKAN 2.12.1's unmodified `main.css`
 | Layer | File | Role |
 |---|---|---|
 | Design tokens | `assets/css/tokens.css` | `--auscope-*` custom properties on `:root`: palette (with `-rgb` triplets), semantic colours, typography, focus ring, component values. The public customisation API. |
-| Bootstrap mapping | `assets/css/base.css` | Assigns tokens to the `--bs-*` variables CKAN reads (`:root, [data-bs-theme=light]`); established AuScope type scale; prose-link underlines; `:focus-visible` outlines; skip link; `prefers-reduced-motion`. |
+| Bootstrap mapping | `assets/css/base.css` | Assigns tokens to the `--bs-*` variables CKAN reads (`:root, [data-bs-theme=light]`); minimum-viewport flex page shell and normal-flow sticky footer; established AuScope type scale; prose-link underlines; `:focus-visible` outlines; skip link; `prefers-reduced-motion`. |
 | Components | `assets/css/components.css` | `--bs-btn-*`, `--bs-nav-pills-*`, `--bs-pagination-*` for primary buttons, pills and pagination; checked and focused form controls. |
 | Branding | `assets/css/branding.css` | Targeted rules for CKAN components with hard-coded colours: page surface, masthead, logo size, masthead nav states, toggler, account bar, footer, homepage search. |
 
@@ -193,8 +193,14 @@ their licences are listed in `public/auscope_core/ASSETS-LICENSES.md`.
 The font tokens prefer the legacy `Calibre-light` and `Calibre-Medium` family names,
 but Core contains no `@font-face` URLs or binaries. Licensed consumers supply those
 faces in their own later-loaded bundle; otherwise the token fallbacks are used.
-The `body` background uses the footer token to cover space below short pages without
-changing Bootstrap's `--bs-body-bg`, which would also recolour controls.
+CKAN 2.12.1 renders its account bar, header, page content (`.main` on ordinary
+pages and `.homepage` around the homepage sections) and footer as direct `body`
+children. Core uses that existing structure as a minimum-viewport-height flex
+column and gives the direct footer an automatic block-start margin. Spare space
+therefore remains page-surface coloured before the footer, while long content keeps
+the footer in normal flow. No fixed positioning, page-height calculation or
+`page.html` override is needed. CKAN and Bootstrap `.container`/grid rules remain
+the single width and responsive-spacing system.
 
 ## Configuration
 

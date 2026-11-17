@@ -21,9 +21,9 @@
   background: var(--auscope-color-surface);
 }
 
-/* The footer colour continues below short pages instead of exposing white body. */
+/* Surface behind spare viewport space before the sticky footer. */
 body {
-  background-color: var(--auscope-footer-bg);
+  background-color: var(--auscope-color-surface);
 }
 
 /* Masthead */
