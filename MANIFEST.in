@@ -4,4 +4,5 @@ graft ckanext/auscope_core/assets
 graft ckanext/auscope_core/i18n
 graft ckanext/auscope_core/public
 graft ckanext/auscope_core/templates
+graft ckanext/auscope_core/tests/fixtures
 global-exclude __pycache__ *.py[cod]

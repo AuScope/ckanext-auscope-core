@@ -1,0 +1,98 @@
+{
+  "coordinate_cases": [
+    {"kind": "latitude", "value": -90, "legacy_valid": true, "shared_valid": true},
+    {"kind": "latitude", "value": "45.5", "legacy_valid": true, "shared_valid": true},
+    {"kind": "latitude", "value": 90, "legacy_valid": true, "shared_valid": true},
+    {"kind": "latitude", "value": 90.1, "legacy_valid": false, "shared_valid": false},
+    {"kind": "longitude", "value": -180, "legacy_valid": true, "shared_valid": true},
+    {"kind": "longitude", "value": "115.86", "legacy_valid": true, "shared_valid": true},
+    {"kind": "longitude", "value": 180, "legacy_valid": true, "shared_valid": true},
+    {"kind": "longitude", "value": 180.1, "legacy_valid": false, "shared_valid": false},
+    {"kind": "latitude", "value": null, "legacy_valid": false, "shared_valid": false},
+    {"kind": "longitude", "value": "", "legacy_valid": false, "shared_valid": false},
+    {"kind": "latitude", "value": "nan", "legacy_valid": false, "shared_valid": false},
+    {"kind": "longitude", "value": "inf", "legacy_valid": false, "shared_valid": false},
+    {"kind": "latitude", "value": true, "legacy_valid": true, "shared_valid": false}
+  ],
+  "bounding_box_cases": [
+    {"value": "110,-45,155,-10", "legacy_valid": true, "shared_valid": true},
+    {"value": ["110,-45,155,-10"], "legacy_valid": true, "shared_valid": true},
+    {"value": "-180,-90,180,90", "legacy_valid": true, "shared_valid": true},
+    {"value": "155,-45,110,-10", "legacy_valid": false, "shared_valid": false},
+    {"value": "110,-10,155,-45", "legacy_valid": false, "shared_valid": false},
+    {"value": "170,-10,-170,10", "legacy_valid": false, "shared_valid": false},
+    {"value": "110,-45,155", "legacy_valid": false, "shared_valid": false},
+    {"value": "110,-45,155,nan", "legacy_valid": false, "shared_valid": false},
+    {"value": "", "legacy_valid": false, "shared_valid": false},
+    {"value": null, "legacy_valid": false, "shared_valid": false},
+    {"value": [110, -45, 155, -10], "legacy_valid": false, "shared_valid": true}
+  ],
+  "geojson_cases": [
+    {
+      "name": "valid point feature collection",
+      "value": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {"type": "Point", "coordinates": [115.86, -31.95]}
+          }
+        ]
+      },
+      "expected_geometry_type": "Point",
+      "legacy_outcome": "valid",
+      "shared_valid": true
+    },
+    {
+      "name": "point expected but polygon supplied",
+      "value": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[115, -32], [116, -32], [116, -31], [115, -32]]]
+            }
+          }
+        ]
+      },
+      "expected_geometry_type": "Point",
+      "legacy_outcome": "accepted_without_validating_any_feature",
+      "shared_valid": false
+    },
+    {
+      "name": "unclosed polygon ring",
+      "value": {
+        "type": "Polygon",
+        "coordinates": [[[115, -32], [116, -32], [116, -31], [115, -31]]]
+      },
+      "expected_geometry_type": "Polygon",
+      "legacy_outcome": "accepted_when_coordinate_ranges_are_valid",
+      "shared_valid": false
+    },
+    {
+      "name": "multiple valid features",
+      "value": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {"type": "Point", "coordinates": [115.86, -31.95]}
+          },
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {"type": "Point", "coordinates": [130.84, -12.46]}
+          }
+        ]
+      },
+      "expected_geometry_type": "Point",
+      "legacy_outcome": "validated_but_sample_and_pidinst_index_only_first_feature",
+      "shared_valid": true
+    }
+  ]
+}

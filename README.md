@@ -7,6 +7,8 @@ Shared branding, header, footer and layouts ([Issue #2](https://github.com/AuSco
 [Issue #3](https://github.com/AuScope/ckanext-auscope-core/issues/3)).
 Enabling the plugin applies AuScope colours, typography, focus styles, repository
 branding and responsive layouts on top of CKAN's templates and CSS.
+Core also exposes dependency-free geographic validation primitives for consumer
+extensions; enabling the plugin does not apply them to any schema automatically.
 
 Consumers: AuScope Data Repository, Sample Repository, Instrument Registry (PIDINST)
 and the RAiD Repository.
@@ -251,7 +253,57 @@ routes, contact forms, instrument/platform routes, annual reporting links or
 repository-specific homepage copy. A consumer may add approved NCRIS artwork in
 `auscope_footer_funding_branding`; it must also record the asset licence.
 
-### Visual check
+## Geographic validation API
+
+The pure Python API is available from
+`ckanext.auscope_core.logic.validators`. It has no CKAN, Shapely or
+`ckanext-spatial` dependency:
+
+```python
+from ckanext.auscope_core.logic.validators import (
+    GeographicValidationError,
+    parse_bounding_box,
+    validate_geojson,
+)
+
+bounds = parse_bounding_box("110,-45,155,-10")
+# (110.0, -45.0, 155.0, -10.0), in west/south/east/north order
+
+try:
+    location = validate_geojson(
+        submitted_location,
+        expected_geometry_type="Point",
+    )
+except GeographicValidationError as error:
+    # A consumer maps this message to its own Scheming/NAVL error structure.
+    add_consumer_error(str(error))
+```
+
+Public functions are:
+
+- `parse_latitude` and `parse_longitude`, which return a finite `float` or raise
+  `GeographicValidationError`;
+- `is_valid_latitude` and `is_valid_longitude`, which provide boolean checks;
+- `validate_position`, for GeoJSON longitude/latitude ordering and optional finite
+  additional dimensions;
+- `parse_bounding_box` and `is_valid_bounding_box`, accepting
+  `west,south,east,north` strings, four-item sequences and the legacy one-item list
+  containing a string; and
+- `validate_geojson` and `is_valid_geojson`, supporting Point and Polygon geometry
+  objects, Features and non-empty FeatureCollections. An expected geometry type can
+  be enforced explicitly.
+
+Bounding boxes require `west < east` and `south < north`. Antimeridian-crossing
+boxes such as `170,-10,-170,10` are rejected; longitude values are never wrapped or
+transformed. Polygon rings must contain at least four positions and be closed.
+
+Consumers decide when to call these functions and retain responsibility for field
+requiredness, `noLocation` clearing, elevation, CRS/EPSG policy, coordinate
+transformation, feature cardinality and spatial-index updates. Data, Sample,
+PIDINST and RAiD can therefore wrap this API in their existing Scheming validators
+without changing their stored schema contracts. No consumer has been migrated yet.
+
+## Visual check
 
 With the development stack running:
 

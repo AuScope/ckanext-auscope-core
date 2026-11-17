@@ -763,3 +763,47 @@ inheritance/rendering, Webassets registration/order/serving and reusable compone
 No CI or test code was added merely to duplicate this coverage. The remote workflow
 was not run because this branch was not pushed. Consumer stacks, AuScope extension
 forks, CKAN 2.11.4 and CKAN 2.10.1 remain unverified.
+
+## ADR-033: Pure geographic primitives; consumer-owned spatial policy
+
+- Date: 2026-11-17. Status: Accepted.
+- Context: Data, Sample and PIDINST contain near-identical latitude, longitude and
+  bounding-box helpers. Their larger location validators differ: Sample alone
+  validates elevation; Sample and PIDINST convert only the first feature into the
+  `spatial` field; requiredness, `noLocation` and EPSG handling are embedded in
+  consumer schemas. The copied validators also skip features whose geometry type
+  does not match the selected location type.
+- Decision: expose dependency-free parsing/validation functions from
+  `ckanext.auscope_core.logic.validators`. Reject booleans and non-finite numbers;
+  use GeoJSON longitude/latitude ordering; support Point and Polygon objects,
+  Features and non-empty FeatureCollections; enforce an explicitly requested
+  geometry type across every feature. Require strict west/south/east/north bounding
+  box ordering and reject antimeridian crossing rather than wrapping coordinates.
+  Do not register a CKAN validator or modify consumer schemas in this stage.
+- Consequences: consumers can replace proven duplicate primitives without gaining
+  a Shapely, `ckanext-spatial` or CKAN dependency. Direct four-item bounding-box
+  sequences are accepted in addition to the legacy string forms, while boolean
+  coordinates, unclosed Polygon rings and mismatched geometry types are deliberately
+  stricter than the reference implementations. Consumers still own requiredness,
+  field clearing, elevation, CRS conversion, feature-cardinality and spatial-index
+  policy. Antimeridian support requires a future explicit representation and index
+  contract rather than a change to these bounds.
+
+## Verification record: geographic validation primitives (2026-11-17)
+
+Environment: Windows host with Podman 6.0.2; one-off `ckan-dev` containers used
+CKAN 2.12.1 on Python 3.14.10. Database-capable commands ran through
+`docker/ckan/test-env.sh` with the dedicated `ckan_test`, `solr-test` and test Redis
+settings. The persistent `ckan-dev` service was not needed because host port 5000
+was already in use.
+
+| Check | Result |
+|---|---|
+| Pure geographic tests on the host | `73 passed in 0.15s`; host lacked CKAN/SQLAlchemy, producing configuration-filter warnings only |
+| Guarded test DB initialisation | Database remained at CKAN head `9445ce34fc23`; `Upgrading DB: SUCCESS` |
+| Complete guarded suite | `149 passed in 37.87s` |
+| Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
+| Disposable wheel build | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 91,025 bytes, 38 entries; includes the geographic module and legacy-contract fixture |
+
+No consumer extension or schema was changed. CKAN 2.11.4 and 2.10.1 remain
+unverified under the compatibility policy.

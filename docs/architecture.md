@@ -2,11 +2,12 @@
 
 ## Overview
 
-`ckanext-auscope-core` holds the frontend pieces the AuScope CKAN repositories have
-in common. Each repository keeps its own extension for schemas, business logic and
-repository-specific pages, and enables `auscope_core` alongside it. The extension is
-developed primarily for CKAN 2.12.1 while retaining a single codebase for older
-AuScope CKAN versions where the shared implementation can be verified.
+`ckanext-auscope-core` holds frontend pieces and small dependency-free utilities the
+AuScope CKAN repositories have in common. Each repository keeps its own extension
+for schemas, business logic and repository-specific pages, and enables
+`auscope_core` alongside it. The extension is developed primarily for CKAN 2.12.1
+while retaining a single codebase for older AuScope CKAN versions where the shared
+implementation can be verified.
 
 Consumers: Data Repository, Sample Repository, Instrument Registry (PIDINST),
 RAiD Repository.
@@ -212,10 +213,31 @@ because their destinations belong to consumer plugins rather than configuration
 data. Future AuScope-specific options must be declared through CKAN's config
 declaration (`IConfigDeclaration`) with the `ckanext.auscope_core.` prefix.
 
+## Geographic validation primitives
+
+`ckanext.auscope_core.logic.validators.geographic` is a pure Python layer with no
+CKAN or geospatial-library import. It validates finite latitude/longitude values,
+GeoJSON positions, ordered bounding boxes and basic Point/Polygon GeoJSON
+structures. Raising parsers and boolean convenience wrappers share the same
+contract.
+
+The module uses GeoJSON longitude/latitude order. Bounding boxes use
+west/south/east/north and require strict west-east and south-north ordering.
+Antimeridian-crossing boxes are deliberately rejected rather than wrapped or
+split. Polygon rings must be closed, and an expected Point or Polygon type is
+enforced across every feature when requested.
+
+This layer does not implement a CKAN validator interface and is not applied by the
+Core plugin. Consumers wrap it in their own Scheming/NAVL validators and retain
+requiredness, field clearing, elevation, CRS transformation, feature-cardinality
+and spatial-index policy. This preserves Core's empty runtime dependency list and
+keeps `ckanext-spatial` and Shapely optional.
+
 ## Out of scope
 
-Business logic, repository-specific schemas (e.g. scheming YAML), metadata
-validators, harvesters, DOI/IGSN/RAiD integrations and CKAN core changes.
+Business logic, repository-specific schemas (e.g. Scheming YAML), consumer metadata
+validation policy, spatial transformation/indexing, harvesters, DOI/IGSN/RAiD
+integrations and CKAN core changes.
 
 ## Development environment
 
