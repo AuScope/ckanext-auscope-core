@@ -807,3 +807,55 @@ was already in use.
 
 No consumer extension or schema was changed. CKAN 2.11.4 and 2.10.1 remain
 unverified under the compatibility policy.
+
+## ADR-034: Explicit shared FOR/EPSG adapters and versioned read API
+
+- Date: 2026-11-18. Status: Accepted.
+- Context: Data, Sample and PIDINST duplicate bare proxy routes for ARDC's ANZSRC
+  2020 FOR service and the EPSG Registry API. They use the same provider response
+  fields but embed consumer field names, Select2 pagination and stored label
+  snapshots in their JavaScript. The legacy routes have no timeouts, server bounds,
+  response validation or safe exception mapping, and all consumers already claim
+  the same unnamespaced paths.
+- Decision: add two explicit provider clients under
+  `services.vocabulary`, sharing only result/error/HTTP validation primitives.
+  Normalize entries to `id`, `label`, optional `description` and `vocabulary`;
+  preserve FOR notations and EPSG codes as strings; expose bounded `search` and
+  exact `lookup` methods. Register versioned read-only routes under
+  `/api/auscope-core/v1/vocabularies/` through CKAN's `IBlueprint`, and declare URLs,
+  connect/read timeouts and limits through `IConfigDeclaration`. Validate clients
+  during construction and validate cross-option CKAN configuration during startup.
+  Stream and close provider responses while enforcing a configurable byte limit.
+  Treat only an upstream lookup 404 as not found; malformed successful responses
+  are provider-response failures. Do not register consumer `/api/proxy` aliases,
+  add UI, enforce consumer CRS/hierarchy policy or add a cache/retry framework in
+  this stage.
+- Consequences: consumers gain one safe provider contract and can migrate
+  incrementally without changing stored metadata. FOR is explicitly fixed to the
+  ANZSRC 2020 vocabulary until a consumer demonstrates version selection. EPSG
+  search returns all non-deprecated CRS types; consumer map filters remain local.
+  Calls still depend on provider availability, and per-process/shared caching can
+  be added later only with an explicit freshness and failure policy. CKAN 2.11.4
+  and 2.10.1 remain unverified.
+
+## Verification record: shared FOR/EPSG vocabulary services (2026-11-18)
+
+Environment: Windows host with Podman 6.0.2; one-off `ckan-dev` containers used
+CKAN 2.12.1 on Python 3.14.10. Database-capable commands ran through
+`docker/ckan/test-env.sh` with `ckan_test`, `solr-test` and the test Redis settings.
+The persistent `ckan-dev` service could not bind host port 5000, so tests used
+one-off containers without published ports.
+
+| Check | Result |
+|---|---|
+| Guarded test DB initialisation | Database remained at CKAN head `9445ce34fc23`; `Upgrading DB: SUCCESS` |
+| Focused mocked provider/API and plugin-config tests | `81 passed in 14.14s` |
+| Complete guarded suite | `223 passed in 72.42s` |
+| Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
+| Disposable wheel build | `ckanext_auscope_core-0.1.0-py3-none-any.whl`, 105,855 bytes; SHA-256 `2ebf65e3db53f44c4a0dc51170cc1a124d61672ebf328582d52d11774018be74` |
+
+All automated provider tests use mocked HTTP calls. Read-only manual probes on
+18 November 2026 confirmed the documented ARDC FOR search/resource shapes and
+EPSG search/generic CRS lookup shapes, but those live services are not CI
+dependencies. No consumer extension, schema, legacy proxy route or reference
+repository was changed. CKAN 2.11.4 and 2.10.1 remain unverified.

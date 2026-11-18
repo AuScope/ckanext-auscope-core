@@ -79,10 +79,12 @@ Interfaces used now:
 | Interface | Purpose |
 |---|---|
 | `IConfigurer.update_config` | `add_template_directory("templates")`, `add_public_directory("public")`, `add_resource("assets", "auscope_core")`; replaces `ckan.site_logo` / `ckan.favicon` with the AuScope files only when they equal CKAN's defaults (ADR-023) |
+| `IBlueprint.get_blueprint` | Registers the versioned, read-only FOR/EPSG vocabulary API |
+| `IConfigDeclaration.declare_config_options` | Declares provider URLs, timeouts and result bounds under `ckanext.auscope_core.vocabulary.*` |
+| `IConfigurable.configure` | Validates cross-option vocabulary bounds and provider URLs during CKAN startup |
 
 Interfaces that may be added later, only for needs shared by all consumers:
-`ITemplateHelpers` (shared helpers), `IBlueprint` (shared pages),
-`IConfigDeclaration` (declared config options).
+`ITemplateHelpers` (shared helpers).
 
 ## Reusable UI components
 
@@ -205,13 +207,14 @@ the single width and responsive-spacing system.
 
 ## Configuration
 
-No configuration options of its own. The plugin changes the defaults of
-`ckan.site_logo` (to the AuScope icon) and `ckan.favicon` only when CKAN's defaults
-are still in effect. The shared header uses CKAN's `ckan.site_title` for the
-repository name. Navigation and repository-specific content are template blocks,
-because their destinations belong to consumer plugins rather than configuration
-data. Future AuScope-specific options must be declared through CKAN's config
-declaration (`IConfigDeclaration`) with the `ckanext.auscope_core.` prefix.
+The plugin declares vocabulary provider URLs, connect/read timeouts and result
+limits under `ckanext.auscope_core.vocabulary.*` through `IConfigDeclaration`. It
+also changes the defaults of `ckan.site_logo` (to the AuScope icon) and
+`ckan.favicon` only when CKAN's defaults are still in effect. The shared header
+uses CKAN's `ckan.site_title` for the repository name. Navigation and
+repository-specific content are template blocks, because their destinations
+belong to consumer plugins rather than configuration data. Future AuScope-specific
+options must use the `ckanext.auscope_core.` prefix.
 
 ## Geographic validation primitives
 
@@ -232,6 +235,46 @@ Core plugin. Consumers wrap it in their own Scheming/NAVL validators and retain
 requiredness, field clearing, elevation, CRS transformation, feature-cardinality
 and spatial-index policy. This preserves Core's empty runtime dependency list and
 keeps `ckanext-spatial` and Shapely optional.
+
+## Vocabulary services
+
+`ckanext.auscope_core.services.vocabulary` contains two explicit provider clients,
+not a generic multi-provider framework. `ForVocabularyClient` adapts ARDC's
+versioned ANZSRC 2020 FOR Linked Data API. `EpsgVocabularyClient` adapts the EPSG
+Registry CRS API. Both expose `search(query, limit=...)` and `lookup(identifier)`
+and return immutable `VocabularyEntry` values with `id`, `label`, optional
+`description` and `vocabulary`.
+
+The service layer has no CKAN or consumer-schema import. Provider transport details
+and response field names remain inside each adapter. Shared transport code applies
+connect/read timeouts, rejects oversized `Content-Length` values, streams at most
+the configured byte limit, closes every response, requires a JSON object, and
+translates expected failures into typed service exceptions. Provider response
+bodies and errors never pass through the public HTTP API.
+
+Client construction validates positive timeouts, positive result/response bounds,
+`default_limit <= max_limit`, and non-empty HTTP/HTTPS provider URLs. CKAN runs the
+same validation during `IConfigurable.configure`, after declared values are
+normalized, so invalid deployment configuration fails during startup rather than
+on a browser request.
+
+The view layer in `views/vocabulary.py` reads declared CKAN configuration, creates
+the selected client, validates `q` and `limit`, and exposes:
+
+```text
+/api/auscope-core/v1/vocabularies/{for|epsg}
+/api/auscope-core/v1/vocabularies/{for|epsg}/{identifier}
+```
+
+Searches return a bounded first page. Exact FOR or EPSG code queries use the lookup
+contract. This is enough for the demonstrated integrations without committing Core
+to legacy provider pagination. No cache is present: the reference implementations
+had only browser-local Select2 caching, and shared cache freshness/failure policy
+has not yet been demonstrated.
+
+Consumer extensions retain Scheming fields, hierarchy/CRS filtering, form widgets,
+requiredness, stored labels and legacy proxy aliases. This prevents route conflicts
+and makes migration opt-in.
 
 ## Out of scope
 

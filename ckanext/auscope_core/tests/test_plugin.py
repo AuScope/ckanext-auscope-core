@@ -10,6 +10,7 @@ import ckan.plugins.toolkit as tk
 
 import ckanext.auscope_core
 from ckanext.auscope_core.plugin import AuscopeCorePlugin
+from ckanext.auscope_core.services.vocabulary import VocabularyConfigurationError
 
 PACKAGE_DIR = os.path.dirname(ckanext.auscope_core.__file__)
 ASSETS_DIR = os.path.join(PACKAGE_DIR, "assets")
@@ -79,3 +80,23 @@ def test_status_show_lists_plugin(app):
 def test_home_page_renders(app):
     resp = app.get("/")
     assert resp.status_code == 200
+
+
+def test_plugin_configure_rejects_inconsistent_vocabulary_limits():
+    prefix = "ckanext.auscope_core.vocabulary"
+    config = {
+        f"{prefix}.connect_timeout_seconds": 3,
+        f"{prefix}.read_timeout_seconds": 10,
+        f"{prefix}.default_limit": 51,
+        f"{prefix}.max_limit": 50,
+        f"{prefix}.max_response_bytes": 1_000_000,
+        f"{prefix}.for.base_url": "https://example.test/for",
+        f"{prefix}.for.concept_base_uri": "https://example.test/concept",
+        f"{prefix}.epsg.base_url": "https://example.test/epsg",
+    }
+
+    with pytest.raises(
+        VocabularyConfigurationError,
+        match="default_limit must be less than or equal to max_limit",
+    ):
+        AuscopeCorePlugin.configure(None, config)

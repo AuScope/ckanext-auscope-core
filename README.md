@@ -7,8 +7,9 @@ Shared branding, header, footer and layouts ([Issue #2](https://github.com/AuSco
 [Issue #3](https://github.com/AuScope/ckanext-auscope-core/issues/3)).
 Enabling the plugin applies AuScope colours, typography, focus styles, repository
 branding and responsive layouts on top of CKAN's templates and CSS.
-Core also exposes dependency-free geographic validation primitives for consumer
-extensions; enabling the plugin does not apply them to any schema automatically.
+Core also exposes dependency-free geographic validation primitives and shared FOR
+and EPSG lookup services for consumer extensions; enabling the plugin does not
+apply them to any schema automatically.
 
 Consumers: AuScope Data Repository, Sample Repository, Instrument Registry (PIDINST)
 and the RAiD Repository.
@@ -56,8 +57,10 @@ Install into the Python environment of an existing CKAN 2.12.1 instance:
 
 ## Configuration
 
-The extension adds no configuration options. It changes the defaults of two CKAN
-core options:
+The extension declares provider URLs, timeouts and result limits under
+`ckanext.auscope_core.vocabulary.*`; their defaults and usage are documented in
+[Shared FOR and EPSG vocabularies](#shared-for-and-epsg-vocabularies). It also
+changes the defaults of two CKAN core options:
 
 - `ckan.site_logo`: if it is CKAN's default `/base/images/ckan-logo.png`, it becomes
   `/auscope_core/images/auscope-logo-icon.png`.
@@ -303,6 +306,80 @@ transformation, feature cardinality and spatial-index updates. Data, Sample,
 PIDINST and RAiD can therefore wrap this API in their existing Scheming validators
 without changing their stored schema contracts. No consumer has been migrated yet.
 
+## Shared FOR and EPSG vocabularies
+
+Core provides small Python clients for ANZSRC 2020 Fields of Research and EPSG
+coordinate reference systems. External calls have fixed connect/read timeouts,
+bounded streamed responses, bounded results and validated response shapes. The
+normalized entry contract is:
+
+```json
+{
+  "id": "3705",
+  "label": "Geology",
+  "description": "This group covers geology.",
+  "vocabulary": "ANZSRC 2020 Fields of Research"
+}
+```
+
+`description` is omitted when the provider supplies none. Identifiers are always
+strings: FOR keeps the authoritative ANZSRC notation and EPSG keeps the numeric
+code without integer conversion in the public result.
+
+Python consumers can use the clients independently of their schema:
+
+```python
+from ckanext.auscope_core.services.vocabulary import (
+    EpsgVocabularyClient,
+    ForVocabularyClient,
+)
+
+for_entries = ForVocabularyClient().search("geology", limit=10)
+for_entry = ForVocabularyClient().lookup("3705")
+epsg_entries = EpsgVocabularyClient().search("Australian", limit=10)
+epsg_entry = EpsgVocabularyClient().lookup("EPSG:4326")
+```
+
+The enabled plugin also exposes read-only browser APIs:
+
+```text
+GET /api/auscope-core/v1/vocabularies/for?q=geology&limit=10
+GET /api/auscope-core/v1/vocabularies/for/3705
+GET /api/auscope-core/v1/vocabularies/epsg?q=Australian&limit=10
+GET /api/auscope-core/v1/vocabularies/epsg/EPSG:4326
+```
+
+Search responses contain `{"items": [...]}` and lookup responses contain
+`{"item": {...}}`. Invalid input is `400`, missing identifiers are `404`, invalid
+upstream responses are `502`, and provider connection failures/timeouts are `503`.
+Provider diagnostics and URLs are not returned to callers.
+
+Defaults can be changed through declared CKAN options:
+
+| Option | Default |
+|---|---|
+| `ckanext.auscope_core.vocabulary.connect_timeout_seconds` | `3` |
+| `ckanext.auscope_core.vocabulary.read_timeout_seconds` | `10` |
+| `ckanext.auscope_core.vocabulary.default_limit` | `20` |
+| `ckanext.auscope_core.vocabulary.max_limit` | `50` |
+| `ckanext.auscope_core.vocabulary.max_response_bytes` | `1000000` |
+| `ckanext.auscope_core.vocabulary.for.base_url` | ARDC ANZSRC 2020 FOR LDA API |
+| `ckanext.auscope_core.vocabulary.for.concept_base_uri` | ANZSRC 2020 FOR concept URI |
+| `ckanext.auscope_core.vocabulary.epsg.base_url` | EPSG Registry API v1 |
+
+There is no server-side cache or retry policy in this stage. Consumers retain
+their schema mappings, allowed hierarchy/CRS-type policy, stored label snapshots
+and form integration. The legacy `/api/proxy/fetch_*` routes are intentionally not
+registered by Core. See
+[docs/shared-for-epsg-vocabulary-review.md](docs/shared-for-epsg-vocabulary-review.md)
+for the implementation comparison and migration boundary.
+
+CKAN validates these options during startup: timeouts, limits and the response byte
+limit must be positive; the default limit cannot exceed the maximum; and provider
+URLs must be non-empty HTTP or HTTPS base URLs. The Python clients apply the same
+checks during construction. Invalid deployment configuration therefore fails
+before requests are served.
+
 ## Visual check
 
 With the development stack running:
@@ -432,3 +509,5 @@ ckanext-auscope-core/
   differences from the legacy sites
 - [docs/ui-component-analysis.md](docs/ui-component-analysis.md): Issue #4
   comparison, extracted component and deliberate exclusions
+- [docs/shared-for-epsg-vocabulary-review.md](docs/shared-for-epsg-vocabulary-review.md):
+  FOR/EPSG reference comparison, providers and shared boundary
