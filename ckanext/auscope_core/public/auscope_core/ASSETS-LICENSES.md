@@ -56,7 +56,7 @@ confirmed; confirm with AuScope (also recorded in ADR-024).
 
 ## CSS and JavaScript provenance
 
-Everything under `assets/` (the CSS in `assets/css/`, the placeholder
-`assets/js/auscope_core.js` and `assets/webassets.yml`) is newly written for this
-package. Only colour values and design conventions were taken from the reference
-`shared_style.css`; no rules or code were copied.
+Everything under `assets/` (the CSS in `assets/css/`, the JavaScript in
+`assets/js/` and `assets/webassets.yml`) is newly written for this package. Only
+colour values, storage contracts and design conventions were taken from the
+reference repositories; no rules or code were copied.

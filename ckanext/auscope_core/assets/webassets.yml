@@ -19,3 +19,12 @@ auscope_core-js:
   output: ckanext-auscope_core/%(version)s-auscope_core.js
   contents:
     - js/auscope_core.js
+
+# Opt-in CKAN module used only by the shared vocabulary picker snippet.
+auscope-core-vocabulary-picker:
+  output: ckanext-auscope_core/%(version)s-auscope-core-vocabulary-picker.js
+  extra:
+    preload:
+      - vendor/jquery
+  contents:
+    - js/vocabulary-picker.js

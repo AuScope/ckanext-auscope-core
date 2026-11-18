@@ -859,3 +859,49 @@ All automated provider tests use mocked HTTP calls. Read-only manual probes on
 EPSG search/generic CRS lookup shapes, but those live services are not CI
 dependencies. No consumer extension, schema, legacy proxy route or reference
 repository was changed. CKAN 2.11.4 and 2.10.1 remain unverified.
+
+## ADR-035: Opt-in Select2 vocabulary picker with consumer-owned output mappings
+
+- Date: 2026-11-18. Status: Accepted.
+- Context: Data, Sample and PIDINST duplicate Select2 3-style FOR/EPSG widgets.
+  They hard-code global field IDs and provider response fields while preserving
+  useful storage contracts: comma-separated FOR notations plus JSON label
+  snapshots, and one EPSG code plus a `"code - name"` label. Core's v1 search API
+  intentionally exposes a bounded first page without pagination metadata.
+- Decision: add one namespaced, opt-in CKAN JavaScript module and snippet for FOR
+  and EPSG. Reuse CKAN's installed jQuery/Select2 through Webassets; add no runtime
+  dependency. Accept consumer field names, endpoint/cardinality/search options and
+  normalized `{id, label}` initial values. Keep the main submitted value
+  identifier-only and provide a minimal list of hidden-output mappings with
+  `id`/`label`/`display`/`selection` sources and `first`/`csv`/`json` formats.
+  Debounce search, abort superseded requests, ignore stale responses, deduplicate
+  IDs and expose safe state messages in an ARIA live region. Always return
+  `more: false`; do not simulate pagination or change the v1 API.
+- Consequences: consumers can preserve current stored values and migrate one form
+  at a time. They must construct complete initial selections from their stored
+  code/label fields and continue to own defaults, requiredness, provider-membership
+  validation, allowed FOR levels/CRS types and schema serialization policy. The
+  picker depends on CKAN's supported frontend stack and must be integration-tested
+  against each claimed CKAN version. CKAN 2.11.4 and 2.10.1 remain unverified.
+
+## Verification record: shared vocabulary picker (2026-11-18)
+
+Environment: Windows host with Node 24.15.0 and Podman 6.0.2; one-off `ckan-dev`
+containers used CKAN 2.12.1 on Python 3.14.10. All pytest commands ran through
+`docker/ckan/test-env.sh` with the dedicated `ckan_test`, `solr-test` and test
+Redis settings.
+
+| Check | Result |
+|---|---|
+| Dependency-free picker JavaScript tests | `8 passed`; FOR/EPSG mapping, single/multiple serialization, edit values, empty/invalid/error responses, removal, duplicates and stale requests |
+| Focused template/Webassets/plugin integration | `29 passed in 37.71s` |
+| Complete guarded CKAN 2.12.1 suite | `226 passed in 64.86s` |
+| Ruff 0.17.3 in `ckan-dev` | `All checks passed!` |
+| `git diff --check` | passed |
+
+No browser-level component route exists in Core because the picker is opt-in and
+no consumer was migrated in this change. The repository has no browser test
+harness for rendering an arbitrary snippet, so browser automation was not added or
+claimed. CKAN template rendering, Webassets registration and the module's request
+and state behavior are covered independently. No consumer repository, schema,
+stored record, legacy proxy route or v1 API response was changed.

@@ -354,6 +354,76 @@ Search responses contain `{"items": [...]}` and lookup responses contain
 upstream responses are `502`, and provider connection failures/timeouts are `503`.
 Provider diagnostics and URLs are not returned to callers.
 
+### Opt-in vocabulary picker
+
+Consumers can render the reusable picker directly from a form template. It uses
+CKAN's installed jQuery/Select2 support and includes its JavaScript bundle only on
+pages that render the snippet. The main field submits one identifier or
+comma-separated identifiers; optional output mappings write consumer-owned hidden
+fields.
+
+FOR multi-select with the established code and JSON-label split:
+
+```jinja
+{% snippet 'snippets/auscope_core/vocabulary_picker.html',
+  name='fields_of_research_code',
+  label=_('Fields of Research'),
+  vocabulary='for',
+  multiple=true,
+  minimum_input_length=3,
+  initial_values=for_initial_values,
+  output_fields=[{
+    'name': 'fields_of_research',
+    'source': 'label',
+    'format': 'json',
+    'initial': data.fields_of_research
+  }],
+  help_text=_('Search by ANZSRC 2020 FOR code or label.')
+%}
+```
+
+`for_initial_values` is constructed by the consumer from its stored codes and
+label snapshots, for example `[{'id': '3705', 'label': 'Geology'}]`. This makes
+the edit form display correctly without changing stored records.
+
+EPSG single-select with separate numeric code and readable label fields:
+
+```jinja
+{% snippet 'snippets/auscope_core/vocabulary_picker.html',
+  name='epsg_code',
+  label=_('Coordinate reference system'),
+  vocabulary='epsg',
+  initial_values=[{'id': data.epsg_code, 'label': epsg_name}],
+  output_fields=[{
+    'name': 'epsg',
+    'source': 'display',
+    'format': 'first',
+    'initial': data.epsg
+  }],
+  placeholder=_('Search by EPSG code or CRS name')
+%}
+```
+
+Each output mapping accepts a consumer field `name`, a `source` (`id`, `label`,
+`display`, or the normalized `selection` object), and a `format` (`first`, `csv`,
+or `json`). An optional `initial` value preserves the existing hidden-field value
+until enhancement completes. The picker does not validate or migrate the consumer
+schema. Consumers remain responsible for server-side membership validation,
+requiredness, allowed FOR hierarchy/CRS types, defaults and constructing initial
+`{id, label}` values.
+
+`minimum_input_length` defaults to `2` and is clamped to at least `1`, because the
+Core search API deliberately rejects empty queries. `limit` defaults to `20` and
+must not exceed the server's configured maximum.
+
+Search is debounced and bounded, with accessible loading/no-result/error messages,
+keyboard navigation, clear/remove behavior, duplicate suppression and stale
+response protection. The current API has no pagination metadata, so the picker
+shows only the bounded first page and asks users to refine the query; it does not
+fake pagination. See
+[docs/shared-vocabulary-picker-review.md](docs/shared-vocabulary-picker-review.md)
+for legacy storage details and adoption guidance.
+
 Defaults can be changed through declared CKAN options:
 
 | Option | Default |
@@ -368,9 +438,9 @@ Defaults can be changed through declared CKAN options:
 | `ckanext.auscope_core.vocabulary.epsg.base_url` | EPSG Registry API v1 |
 
 There is no server-side cache or retry policy in this stage. Consumers retain
-their schema mappings, allowed hierarchy/CRS-type policy, stored label snapshots
-and form integration. The legacy `/api/proxy/fetch_*` routes are intentionally not
-registered by Core. See
+their schema mappings, allowed hierarchy/CRS-type policy and stored label
+snapshots. The legacy `/api/proxy/fetch_*` routes are intentionally not registered
+by Core. See
 [docs/shared-for-epsg-vocabulary-review.md](docs/shared-for-epsg-vocabulary-review.md)
 for the implementation comparison and migration boundary.
 
@@ -452,6 +522,13 @@ CKAN source install, change the `use = config:` line to point at your CKAN sourc
 `test-core.ini`, set `solr_url` to a test-only Solr core, and make sure the
 `CKAN_*` connection variables are unset or point at test services.
 
+The vocabulary picker has dependency-free Node tests for result mapping,
+serialization, failures and stale requests:
+
+```bash
+node --test --test-isolation=none ckanext/auscope_core/tests/js/vocabulary-picker.test.js
+```
+
 ## Linting
 
 ```bash
@@ -486,14 +563,14 @@ ckanext-auscope-core/
         │   ├── header.html      # Icon/title; preserves CKAN account/nav/search
         │   ├── footer.html      # Shared contact/funding/community content
         │   ├── home/index.html  # Full-width search and reusable lower columns
-        │   └── snippets/auscope_core/ # page_section and facet_select
+        │   └── snippets/auscope_core/ # page_section, facet_select, vocabulary_picker
         ├── public/auscope_core/
         │   ├── images/          # AuScope logos and favicon
         │   └── ASSETS-LICENSES.md
         ├── assets/              # Webassets library "auscope_core"
         │   ├── webassets.yml
         │   ├── css/             # tokens.css, base.css, components.css, branding.css
-        │   └── js/              # auscope_core.js (placeholder)
+        │   └── js/              # shared and opt-in CKAN modules
         ├── i18n/                # Translations (empty for now)
         └── tests/               # pytest tests
 ```
@@ -511,3 +588,5 @@ ckanext-auscope-core/
   comparison, extracted component and deliberate exclusions
 - [docs/shared-for-epsg-vocabulary-review.md](docs/shared-for-epsg-vocabulary-review.md):
   FOR/EPSG reference comparison, providers and shared boundary
+- [docs/shared-vocabulary-picker-review.md](docs/shared-vocabulary-picker-review.md):
+  legacy picker behaviour, storage mappings and adoption guidance

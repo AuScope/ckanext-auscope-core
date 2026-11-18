@@ -1,0 +1,67 @@
+{#
+Opt-in FOR/EPSG picker.
+
+Required: name, label, vocabulary ("for" or "epsg").
+Optional: id, endpoint, multiple, initial_values, output_fields, placeholder,
+          minimum_input_length, limit, help_text, errors, required, classes.
+
+Each output_fields entry has name, source (id, label, display or selection),
+format (first, csv or json), and an optional initial value.
+#}
+{% set control_id = id|default('auscope-core-vocabulary-' ~ name|replace('_', '-')|replace(' ', '-')) %}
+{% set is_multiple = multiple|default(false) %}
+{% set picker_endpoint = endpoint|default('/api/auscope-core/v1/vocabularies/' ~ vocabulary) %}
+{% set picker_initial_values = initial_values|default([]) %}
+{% set picker_outputs = output_fields|default([]) %}
+{% set help_id = control_id ~ '-help' %}
+{% set status_id = control_id ~ '-status' %}
+{% asset 'auscope_core/auscope-core-vocabulary-picker' %}
+<div class="form-group auscope-core-vocabulary-picker {{ classes|default('') }}"
+     data-module="auscope-core-vocabulary-picker"
+     data-module-vocabulary="{{ vocabulary }}"
+     data-module-endpoint="{{ picker_endpoint }}"
+     data-module-multiple="{{ 'true' if is_multiple else 'false' }}"
+     data-module-initial-values="{{ picker_initial_values|tojson|forceescape }}"
+     data-module-placeholder="{{ placeholder|default(_('Search the vocabulary')) }}"
+     data-module-minimum-input-length="{{ minimum_input_length|default(2) }}"
+     data-module-limit="{{ limit|default(20) }}"
+     data-module-loading-message="{{ _('Searching…') }}"
+     data-module-no-results-message="{{ _('No matching values found.') }}"
+     data-module-invalid-message="{{ _('Enter a valid search term.') }}"
+     data-module-error-message="{{ _('Vocabulary search is temporarily unavailable. Try again.') }}">
+  <label class="form-label" id="{{ control_id }}-label" for="{{ control_id }}">
+    {% if required|default(false) %}
+      <span class="control-required" title="{{ _('This field is required') }}">*</span>
+    {% endif %}
+    {{ label }}
+  </label>
+  <input type="hidden"
+         id="{{ control_id }}"
+         name="{{ name }}"
+         value="{{ picker_initial_values|map(attribute='id')|join(',') }}"
+         data-vocabulary-input
+         data-label-id="{{ control_id }}-label"
+         aria-describedby="{{ help_id }} {{ status_id }}"
+         {% if required|default(false) %}required{% endif %}>
+  {% for output in picker_outputs %}
+    <input type="hidden"
+           name="{{ output.name }}"
+           value="{{ output.initial|default('') }}"
+           data-vocabulary-output
+           data-value-source="{{ output.source|default('id') }}"
+           data-value-format="{{ output.format|default('first') }}">
+  {% endfor %}
+  {% if errors|default([]) %}
+    {% for error in errors %}
+      <span class="error-block">{{ error }}</span>
+    {% endfor %}
+  {% endif %}
+  <p class="form-text" id="{{ help_id }}">
+    {{ help_text|default(_('Type to search, then use the arrow keys and Enter to choose a value.')) }}
+  </p>
+  <p class="form-text auscope-core-vocabulary-picker__status"
+     id="{{ status_id }}"
+     data-vocabulary-status
+     role="status"
+     aria-live="polite"></p>
+</div>

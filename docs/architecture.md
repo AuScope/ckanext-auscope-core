@@ -166,7 +166,10 @@ The theme is plain CSS layered over CKAN 2.12.1's unmodified `main.css`
 Bundles: `auscope_core-tokens` (tokens only) and `auscope_core-css` (base,
 components, branding, with `extra.preload: [auscope_core/auscope_core-tokens]`).
 CKAN's `include_asset` emits preloaded bundles first and only once.
-`auscope_core-js` is registered but not included (ADR-022).
+`auscope_core-js` is registered but not included (ADR-022). The separate
+`auscope-core-vocabulary-picker` JavaScript bundle is included only by the opt-in
+vocabulary snippet and preloads CKAN's `vendor/jquery`; it does not ship a vendor
+library.
 
 Inclusion: `templates/base.html` extends core with `{% ckan_extends %}` and, in
 `{% block styles %}`, renders `{{ super() }}` (core `main.css`) followed by the
@@ -272,9 +275,22 @@ to legacy provider pagination. No cache is present: the reference implementation
 had only browser-local Select2 caching, and shared cache freshness/failure policy
 has not yet been demonstrated.
 
-Consumer extensions retain Scheming fields, hierarchy/CRS filtering, form widgets,
-requiredness, stored labels and legacy proxy aliases. This prevents route conflicts
-and makes migration opt-in.
+The opt-in `snippets/auscope_core/vocabulary_picker.html` component is a CKAN
+JavaScript module over the normalized search routes. It accepts vocabulary or
+endpoint, cardinality, field name, initial normalized values, placeholder,
+minimum query length and result limit. Configured hidden outputs serialize IDs,
+labels, readable display values or normalized selections as a first value, CSV or
+JSON. Requests are debounced; prior requests are aborted and sequence numbers
+prevent stale updates. Select2 provides combobox keyboard/selection behavior and
+the snippet adds an ARIA live region for loading, empty and safe failure states.
+
+The main form value remains identifier-only and uses Select2's established single
+or comma-separated multiple form shape. Core does not know consumer Scheming field
+names or reconstruct label snapshots implicitly. Consumers pass `{id, label}`
+initial values from stored fields and retain hierarchy/CRS filtering, requiredness,
+defaults, membership validation, legacy proxy aliases and final storage policy.
+The search API has no pagination metadata, so the module always reports
+`more: false`; a pagination requirement must first define an API contract.
 
 ## Out of scope
 
@@ -318,8 +334,10 @@ and licence entries for every image. CI rewrites the hostname to its own test-on
 `solr` service. `test_layouts.py` renders the home, dataset list, dataset detail and
 login pages; checks the common landmarks and responsive grid; and verifies the
 consumer block and macro contracts. CI installs the built package non-editably,
-verifies its entry point and packaged runtime directories, runs the installed suite in
-`ckan/ckan-dev:2.12.1`, and lints with ruff.
+verifies its entry point and packaged runtime directories, runs the installed suite
+in `ckan/ckan-dev:2.12.1`, and lints with ruff. Dependency-free Node tests exercise
+the vocabulary picker's normalized mapping, output serialization, error states,
+request cancellation and out-of-order response protection.
 
 Only CKAN 2.12.1 has been exercised so far. CKAN 2.11.4 and 2.10.1 remain
 unverified until their exact-version integration suites or migration evaluations

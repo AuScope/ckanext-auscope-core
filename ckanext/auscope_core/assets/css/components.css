@@ -77,3 +77,14 @@
 .auscope-core-facet-select__form .btn {
   justify-self: start;
 }
+
+/* Opt-in vocabulary picker. Select2 supplies the combobox interaction; these
+ * rules only make its CKAN-provided control and live status fit the form. */
+.auscope-core-vocabulary-picker .select2-container {
+  inline-size: 100%;
+}
+
+.auscope-core-vocabulary-picker__status {
+  min-block-size: 1.5em;
+  margin-block-end: 0;
+}

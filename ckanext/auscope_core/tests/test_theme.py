@@ -28,7 +28,13 @@ def _stylesheets(soup):
 @pytest.mark.ckan_config("ckan.plugins", "auscope_core")
 @pytest.mark.usefixtures("with_plugins")
 @pytest.mark.parametrize(
-    "name", ["auscope_core-tokens", "auscope_core-css", "auscope_core-js"]
+    "name",
+    [
+        "auscope_core-tokens",
+        "auscope_core-css",
+        "auscope_core-js",
+        "auscope-core-vocabulary-picker",
+    ],
 )
 def test_bundle_registered(name):
     assert is_registered(f"auscope_core/{name}")
