@@ -1,7 +1,7 @@
 {#
-Opt-in FOR/EPSG picker.
+Opt-in FOR/EPSG/ROR picker.
 
-Required: name, label, vocabulary ("for" or "epsg").
+Required: name, label, vocabulary ("for", "epsg" or "ror").
 Optional: id, endpoint, multiple, initial_values, output_fields, placeholder,
           minimum_input_length, limit, help_text, errors, required, classes.
 
@@ -29,7 +29,7 @@ format (first, csv or json), and an optional initial value.
      data-module-no-results-message="{{ _('No matching values found.') }}"
      data-module-invalid-message="{{ _('Enter a valid search term.') }}"
      data-module-error-message="{{ _('Vocabulary search is temporarily unavailable. Try again.') }}">
-  <label class="form-label" id="{{ control_id }}-label" for="{{ control_id }}">
+  <label class="form-label" id="{{ control_id }}-label" data-vocabulary-label for="{{ control_id }}">
     {% if required|default(false) %}
       <span class="control-required" title="{{ _('This field is required') }}">*</span>
     {% endif %}
@@ -41,7 +41,7 @@ format (first, csv or json), and an optional initial value.
          value="{{ picker_initial_values|map(attribute='id')|join(',') }}"
          data-vocabulary-input
          data-label-id="{{ control_id }}-label"
-         aria-describedby="{{ help_id }} {{ status_id }}"
+         aria-describedby="{{ help_id }} {{ status_id }}{% if errors|default([]) %} {{ control_id }}-errors{% endif %}"{% if errors|default([]) %} aria-invalid="true"{% endif %}
          {% if required|default(false) %}required{% endif %}>
   {% for output in picker_outputs %}
     <input type="hidden"
@@ -52,16 +52,18 @@ format (first, csv or json), and an optional initial value.
            data-value-format="{{ output.format|default('first') }}">
   {% endfor %}
   {% if errors|default([]) %}
-    {% for error in errors %}
-      <span class="error-block">{{ error }}</span>
-    {% endfor %}
+    <div id="{{ control_id }}-errors" data-vocabulary-description>
+      {% for error in errors %}
+        <span class="error-block">{{ error }}</span>
+      {% endfor %}
+    </div>
   {% endif %}
-  <p class="form-text" id="{{ help_id }}">
+  <p class="form-text" id="{{ help_id }}" data-vocabulary-description>
     {{ help_text|default(_('Type to search, then use the arrow keys and Enter to choose a value.')) }}
   </p>
   <p class="form-text auscope-core-vocabulary-picker__status"
      id="{{ status_id }}"
-     data-vocabulary-status
+     data-vocabulary-status data-vocabulary-description
      role="status"
      aria-live="polite"></p>
 </div>

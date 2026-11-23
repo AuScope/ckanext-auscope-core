@@ -1,5 +1,5 @@
 /*
- * Opt-in FOR/EPSG autocomplete for CKAN forms.
+ * Opt-in vocabulary and ROR autocomplete for CKAN forms.
  *
  * The small CommonJS export exists solely so the request, serialization and
  * stale-response behaviour can be tested without adding a frontend dependency.
@@ -16,6 +16,8 @@
   }
 }(typeof window !== "undefined" ? window : null, function () {
   "use strict";
+
+  var nextControlId = 0;
 
   function parseOption(value, fallback) {
     if (value === undefined || value === null || value === "") {
@@ -38,6 +40,12 @@
   function displayText(item, vocabulary) {
     if (vocabulary === "epsg") {
       return item.id + " - " + item.label;
+    }
+    if (vocabulary === "ror" && item.description) {
+      return item.label + " (" + item.description + ") — " + item.id;
+    }
+    if (vocabulary === "ror" && !item.label) {
+      return item.id;
     }
     return item.label + " (" + item.id + ")";
   }
@@ -134,52 +142,91 @@
           this.options.vocabulary
         );
 
-        this.input.select2({
-          placeholder: this.options.placeholder,
-          minimumInputLength: this.minimumInputLength,
-          multiple: this.multiple,
-          allowClear: !this.multiple,
-          query: $.proxy(this.query, this)
-        });
+        this.mountSelect();
         this.applyAccessibility();
-        this.input.on("change", $.proxy(this.syncOutputs, this));
-
-        if (this.initialValues.length) {
-          this.input.select2(
-            "data",
-            this.multiple ? this.initialValues : this.initialValues[0],
-            true
-          );
-        }
         this.syncOutputs();
+        this.bindCompositeLifecycle();
+      },
+
+      mountSelect: function () {
+        var self = this;
+        this.select = $("<select>").attr({
+          id: "auscope-core-vocabulary-control-" + (++nextControlId),
+          "aria-required": this.input.prop("required") ? "true" : null
+        }).prop("multiple", this.multiple).insertAfter(this.input);
+        if (!this.multiple) {
+          this.select.append(new Option("", ""));
+        }
+        this.initialValues.forEach(function (item) {
+          self.select.append(new Option(item.text, item.id, true, true));
+        });
+
+        this.select.select2({
+          width: "100%",
+          placeholder: this.options.placeholder,
+          allowClear: !this.multiple,
+          ajax: {
+            transport: function (params, success) {
+              self.query({
+                term: params.data.term,
+                callback: function (data) {
+                  success({results: data.results, pagination: {more: false}});
+                }
+              });
+              return {abort: self.cancelSearch.bind(self)};
+            }
+          }
+        });
+        this.widget = this.select.data("select2");
+        this.select.on("change.auscopeCoreVocabulary", this.syncOutputs.bind(this));
+      },
+
+      bindCompositeLifecycle: function () {
+        this.composite = this.el.closest('[data-module~="auscope-composite"]');
+        if (!this.composite.length) {
+          return;
+        }
+        var row = this.el.closest("[data-composite-row]")[0];
+        this.onReindexed = this.applyAccessibility.bind(this);
+        this.onCleared = $.proxy(function (_event, detail) {
+          if (detail.row[0] === row) {
+            this.cancelSearch();
+            this.setStatus("");
+            this.select.val(null).trigger("change");
+          }
+        }, this);
+        this.onRemoved = $.proxy(function (_event, detail) {
+          if (detail.row[0] === row) {
+            this.teardown();
+          }
+        }, this);
+        this.composite.on("auscope-composite:rows-reindexed", this.onReindexed);
+        this.composite.on("auscope-composite:row-cleared", this.onCleared);
+        this.composite.on("auscope-composite:row-removed", this.onRemoved);
       },
 
       applyAccessibility: function () {
-        var labelledBy = this.input.attr("data-label-id");
-        var describedBy = this.input.attr("aria-describedby");
-        var container = this.input.select2("container");
-        container.attr({
+        var label = this.el.find("[data-vocabulary-label]");
+        label.attr("for", this.select.attr("id"));
+        var labelledBy = label.attr("id");
+        var describedBy = this.el.find("[data-vocabulary-description]").map(function () {
+          return this.id;
+        }).get().join(" ");
+        var attributes = {
           "aria-labelledby": labelledBy,
-          "aria-describedby": describedBy
-        });
-        container.find("input").attr({
-          "aria-labelledby": labelledBy,
-          "aria-describedby": describedBy
-        });
+          "aria-describedby": describedBy,
+          "aria-invalid": this.input.attr("aria-invalid")
+        };
+        this.input.attr(attributes).attr("data-label-id", labelledBy);
+        var selection = this.select.next(".select2-container").find(".select2-selection");
+        selection.attr(attributes).attr("aria-required", this.select.attr("aria-required"));
       },
 
       query: function (query) {
         var self = this;
         var term = $.trim(query.term || "");
-        var requestNumber = ++this.requestNumber;
-
-        if (this.pendingTimer) {
-          clearTimeout(this.pendingTimer);
-        }
-        if (this.pendingRequest) {
-          this.pendingRequest.abort();
-          this.pendingRequest = null;
-        }
+        this.cancelSearch();
+        var requestNumber = this.requestNumber;
         var minimumInputLength = this.minimumInputLength || Math.max(
           1,
           Number(this.options.minimumInputLength) || 1
@@ -227,8 +274,18 @@
       },
 
       syncOutputs: function () {
-        var selected = this.input.select2("data");
-        var items = selected ? (Array.isArray(selected) ? selected : [selected]) : [];
+        var saved = this.initialValues;
+        var items = this.select.select2("data").filter(function (item) {
+          return item.id;
+        }).map(function (item) {
+          if (typeof item.label === "string") {
+            return item;
+          }
+          return saved.find(function (initial) {
+            return initial.id === item.id;
+          }) || item;
+        });
+        this.input.val(serializeSelections(items, "id", this.multiple ? "csv" : "first"));
         this.outputs.each(function () {
           var output = $(this);
           output.val(serializeSelections(
@@ -237,22 +294,38 @@
             output.attr("data-value-format") || "first"
           ));
         });
+        this.input.trigger("change");
       },
 
       setStatus: function (message) {
         this.status.text(message);
       },
 
-      teardown: function () {
+      cancelSearch: function () {
         ++this.requestNumber;
         if (this.pendingTimer) {
           clearTimeout(this.pendingTimer);
+          this.pendingTimer = null;
         }
         if (this.pendingRequest) {
           this.pendingRequest.abort();
+          this.pendingRequest = null;
         }
-        this.input.off("change");
-        this.input.select2("destroy");
+      },
+
+      teardown: function () {
+        this.cancelSearch();
+        if (this.composite && this.composite.length) {
+          this.composite.off("auscope-composite:rows-reindexed", this.onReindexed);
+          this.composite.off("auscope-composite:row-cleared", this.onCleared);
+          this.composite.off("auscope-composite:row-removed", this.onRemoved);
+        }
+        if (this.widget) {
+          this.select.off(".auscopeCoreVocabulary");
+          this.widget.destroy();
+          this.select.remove();
+          this.widget = null;
+        }
       }
     };
   }

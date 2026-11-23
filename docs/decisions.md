@@ -905,3 +905,24 @@ harness for rendering an arbitrary snippet, so browser automation was not added 
 claimed. CKAN template rendering, Webassets registration and the module's request
 and state behavior are covered independently. No consumer repository, schema,
 stored record, legacy proxy route or v1 API response was changed.
+
+
+## Shared ROR lookup for participating organisations
+
+ROR v2 joins the versioned read-only vocabulary HTTP API and uses the same
+request bounds and result shape. Search returns active organisations, and
+exact lookup reports all ROR statuses. The canonical URL and checksum helper
+can be used offline by consumers. CKAN 2.12.1 bundles Select2 4, so the picker
+uses its select and AJAX interfaces while retaining named hidden inputs for
+submission. AuScope Composite row events synchronize and release picker state.
+RAiD owns the role and date rules. PIDINST adoption is a separate decision.
+
+The integration used Core base `102a5d90781f55d5fed775eddee26cb8a7e43da7`
+plus the uncommitted ROR changes, Composite
+`6975c935d0134ca10f05af3fd696f690b045ec0b` and Scheming
+`de22cc4ecf091ef50cd473be2b6baa767c7ff2d4`.
+
+On CKAN 2.12.1 and Python 3.14.10, the guarded Core suite passed 243 tests
+in 31.03 seconds. The picker passed all 9 Node tests and Ruff reported no
+issues. The RAiD integration suite passed 16 Action API and Edge tests,
+including an outage and reindexing round trip for the ROR picker.

@@ -16,6 +16,9 @@ from ckanext.auscope_core.services.vocabulary.for_ardc import (
     DEFAULT_BASE_URL as DEFAULT_FOR_BASE_URL,
     DEFAULT_CONCEPT_BASE_URI,
 )
+from ckanext.auscope_core.services.vocabulary.ror import (
+    DEFAULT_BASE_URL as DEFAULT_ROR_BASE_URL,
+)
 from ckanext.auscope_core.views.vocabulary import blueprint as vocabulary_blueprint
 
 log = logging.getLogger(__name__)
@@ -78,7 +81,10 @@ class AuscopeCorePlugin(plugins.SingletonPlugin):
             **common,
         )
         validate_client_configuration(
-            urls={"epsg.base_url": config_[f"{prefix}.epsg.base_url"]},
+            urls={
+                "epsg.base_url": config_[f"{prefix}.epsg.base_url"],
+                "ror.base_url": config_[f"{prefix}.ror.base_url"],
+            },
             **common,
         )
 
@@ -103,4 +109,7 @@ class AuscopeCorePlugin(plugins.SingletonPlugin):
         ).set_validators("not_empty")
         declaration.declare(
             f"{prefix}.epsg.base_url", DEFAULT_EPSG_BASE_URL
+        ).set_validators("not_empty")
+        declaration.declare(
+            f"{prefix}.ror.base_url", DEFAULT_ROR_BASE_URL
         ).set_validators("not_empty")

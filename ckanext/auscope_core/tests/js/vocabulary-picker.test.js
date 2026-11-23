@@ -184,3 +184,16 @@ test("new searches abort old requests and ignore out-of-order responses", async 
   assert.equal(callbacks[0][0], "new");
   assert.equal(callbacks[0][1].results[0].id, "3705");
 });
+
+test("ROR selection keeps canonical URL and displays the saved name or ID", () => {
+  const id = "https://ror.org/01nfmeh72";
+  const [result] = picker.normalizeItems(
+    [{id, label: "Research University", description: "Australia"}], "ror"
+  );
+  assert.match(result.text, /Research University.*Australia/);
+  assert.equal(picker.serializeSelections([result], "id", "first"), id);
+  assert.equal(picker.serializeSelections([result], "label", "first"), "Research University");
+  const saved = picker.normalizeItems([{id, label: ""}], "ror");
+  assert.equal(saved[0].text, id);
+  assert.equal(picker.serializeSelections(saved, "label", "first"), "");
+});

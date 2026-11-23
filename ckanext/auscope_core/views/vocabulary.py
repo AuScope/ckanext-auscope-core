@@ -15,6 +15,8 @@ from ckanext.auscope_core.services.vocabulary import (
     VocabularyResponseError,
 )
 
+from ckanext.auscope_core.services.vocabulary.ror import RorClient
+
 log = logging.getLogger(__name__)
 
 blueprint = Blueprint("auscope_core_vocabulary", __name__)
@@ -45,7 +47,12 @@ def get_vocabulary_client(provider: str):
             base_url=toolkit.config[f"{_PREFIX}.epsg.base_url"],
             **common,
         )
-    raise InvalidVocabularyInput("provider must be 'for' or 'epsg'")
+    if provider == "ror":
+        return RorClient(
+            base_url=toolkit.config[f"{_PREFIX}.ror.base_url"],
+            **common,
+        )
+    raise InvalidVocabularyInput("provider must be 'for', 'epsg', or 'ror'")
 
 
 def _error(code: str, message: str, status: int):
@@ -79,7 +86,7 @@ def _handle_error(error: Exception, provider: str):
 
 @blueprint.get("/api/auscope-core/v1/vocabularies/<provider>")
 def vocabulary_search(provider: str):
-    """Search a configured FOR or EPSG vocabulary."""
+    """Search a configured provider."""
     try:
         client = get_vocabulary_client(provider)
         entries = client.search(request.args.get("q"), limit=request.args.get("limit"))
@@ -106,3 +113,9 @@ def vocabulary_lookup(provider: str, identifier: str):
         VocabularyResponseError,
     ) as error:
         return _handle_error(error, provider)
+
+
+@blueprint.get("/api/auscope-core/v1/vocabularies/ror/lookup")
+def ror_lookup():
+    """Accept a complete ROR URL in a query parameter."""
+    return vocabulary_lookup("ror", request.args.get("id"))

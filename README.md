@@ -306,7 +306,7 @@ transformation, feature cardinality and spatial-index updates. Data, Sample,
 PIDINST and RAiD can therefore wrap this API in their existing Scheming validators
 without changing their stored schema contracts. No consumer has been migrated yet.
 
-## Shared FOR and EPSG vocabularies
+## Shared vocabularies and ROR
 
 Core provides small Python clients for ANZSRC 2020 Fields of Research and EPSG
 coordinate reference systems. External calls have fixed connect/read timeouts,
@@ -354,10 +354,34 @@ Search responses contain `{"items": [...]}` and lookup responses contain
 upstream responses are `502`, and provider connection failures/timeouts are `503`.
 Provider diagnostics and URLs are not returned to callers.
 
+### ROR organisation lookup
+
+The read-only ROR v2 client supports global name search and exact lookup.
+It canonicalizes a short ID, a `ror.org/<id>` identifier, or an HTTPS ROR URL,
+and verifies the ROR checksum. Python consumers can import
+`RorClient` and `normalize_ror_id` from
+`ckanext.auscope_core.services.vocabulary.ror`.
+
+```text
+GET /api/auscope-core/v1/vocabularies/ror?q=university&limit=10
+GET /api/auscope-core/v1/vocabularies/ror/01nfmeh72
+GET /api/auscope-core/v1/vocabularies/ror/lookup?id=https%3A%2F%2Fror.org%2F01nfmeh72
+```
+
+Results use the same search and lookup envelopes as FOR and EPSG.
+Each ROR result includes its canonical `id`, display `label`, `vocabulary`,
+`status`, and optional country names in `description`. Search and pasted-ID
+suggestions return active organisations. Exact lookup also returns inactive
+and withdrawn records with their registry status. ROR rate limits and
+connection failures map to `503`. Searches use one upstream page and never
+fetch parent records. Enable `auscope_core` and allow the CKAN server to reach
+`https://api.ror.org`. Configure a trusted alternate endpoint with
+`ckanext.auscope_core.vocabulary.ror.base_url` for testing or a managed mirror.
+
 ### Opt-in vocabulary picker
 
 Consumers can render the reusable picker directly from a form template. It uses
-CKAN's installed jQuery/Select2 support and includes its JavaScript bundle only on
+CKAN 2.12.1's bundled jQuery and Select2 4. It includes its JavaScript bundle on
 pages that render the snippet. The main field submits one identifier or
 comma-separated identifiers; optional output mappings write consumer-owned hidden
 fields.
@@ -404,6 +428,15 @@ EPSG single-select with separate numeric code and readable label fields:
 %}
 ```
 
+For ROR, set `vocabulary='ror'` and supply one stored `{id, label}` value,
+or an empty list for a new selection. An empty label displays the stored URL.
+Map a hidden output from `label` to persist a display snapshot. Rendering a saved
+selection requires no provider request. In an AuScope Composite subfield, pass
+the flattened input name and unique ID supplied by the row adapter. The picker
+refreshes its accessible references when a row is reindexed and handles row
+clear and removal through Composite events. The picker creates an unnamed
+Select2 control and persists values through the named hidden inputs.
+
 Each output mapping accepts a consumer field `name`, a `source` (`id`, `label`,
 `display`, or the normalized `selection` object), and a `format` (`first`, `csv`,
 or `json`). An optional `initial` value preserves the existing hidden-field value
@@ -428,6 +461,7 @@ Defaults can be changed through declared CKAN options:
 
 | Option | Default |
 |---|---|
+| `ckanext.auscope_core.vocabulary.ror.base_url` | `https://api.ror.org/v2/organizations` |
 | `ckanext.auscope_core.vocabulary.connect_timeout_seconds` | `3` |
 | `ckanext.auscope_core.vocabulary.read_timeout_seconds` | `10` |
 | `ckanext.auscope_core.vocabulary.default_limit` | `20` |
