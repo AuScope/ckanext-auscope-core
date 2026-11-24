@@ -1,0 +1,179 @@
+.auscope-core-form-page > :is(.primary, .secondary),
+.auscope-core-form-title-row > div {
+  min-inline-size: 0;
+}
+
+.auscope-core-form-page > .secondary .module-heading {
+  background-color: var(--auscope-color-surface);
+  color: var(--auscope-color-heading);
+}
+
+.auscope-core-form-header {
+  margin-block-end: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.auscope-core-form-page-heading .auscope-core-form-header {
+  margin-block-end: 0;
+}
+
+.auscope-core-form-title-row,
+.auscope-core-form-header-actions,
+.auscope-core-form-actions.form-actions,
+.auscope-core-form-action-group,
+.auscope-core-form-navigation ul {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.auscope-core-form-title-row {
+  justify-content: space-between;
+}
+
+.auscope-core-form-header h1,
+.auscope-core-form-description {
+  margin: 0;
+}
+
+.auscope-core-form-description {
+  margin-block-start: .5rem;
+}
+
+.auscope-core-form-navigation ul {
+  list-style: none;
+  margin: .75rem 0 0;
+  padding: 0 0 .25rem;
+  border-block-end: 1px solid var(--auscope-color-border);
+}
+
+.auscope-core-form-navigation a {
+  display: block;
+  padding: .375rem .75rem;
+  border-block-end: .1875rem solid transparent;
+  color: var(--auscope-nav-active-color);
+}
+
+.auscope-core-form-navigation :is(.active > a, a[aria-current="page"]) {
+  border-block-end-color: var(--auscope-nav-active-indicator);
+  font-family: var(--auscope-font-family-medium);
+}
+
+.auscope-core-form-navigation a:hover {
+  background-color: var(--auscope-color-surface);
+}
+
+.auscope-core-form-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.auscope-core-form-stage {
+  display: flex;
+  flex: 1 1 10rem;
+  min-inline-size: 0;
+  background-color: var(--auscope-color-surface);
+  color: var(--auscope-color-text);
+  border: 1px solid var(--auscope-color-border);
+  border-radius: var(--bs-border-radius, .25rem);
+}
+
+.auscope-core-form-stage--active {
+  background-color: var(--auscope-color-primary);
+  color: var(--auscope-color-on-primary);
+  border-color: var(--auscope-color-primary);
+  --auscope-focus-ring-color: var(--auscope-color-on-primary);
+  --bs-heading-color: var(--auscope-color-on-primary);
+}
+
+.auscope-core-form-stage--completed {
+  color: var(--auscope-color-primary);
+}
+
+.auscope-core-form-stage-label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: .625rem;
+  min-inline-size: 0;
+  padding: .5rem .75rem;
+  background: none;
+  border: 0;
+  border-radius: inherit;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+:is(a, button).auscope-core-form-stage-label:hover {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.auscope-core-form-stage-marker {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  inline-size: 1.5em;
+  block-size: 1.5em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+.auscope-core-form-stage--active .auscope-core-form-stage-marker {
+  background-color: var(--auscope-color-on-primary);
+  color: var(--auscope-color-primary);
+  border-color: var(--auscope-color-on-primary);
+}
+
+.auscope-core-form-stage-label:focus-visible,
+.auscope-core-form-navigation a:focus-visible {
+  outline: var(--auscope-focus-ring-width) solid var(--auscope-focus-ring-color);
+  outline-offset: var(--auscope-focus-ring-offset);
+}
+
+.auscope-core-form-stage--active .auscope-core-form-stage-label:focus-visible {
+  outline-offset: calc(-1 * var(--auscope-focus-ring-width));
+}
+
+.auscope-core-form-actions.form-actions {
+  justify-content: space-between;
+  text-align: start;
+}
+
+.auscope-core-form-action-description {
+  flex-basis: 100%;
+}
+
+.auscope-core-form-action-group--primary {
+  margin-inline-start: auto;
+}
+
+.auscope-core-form-action-group .btn {
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+  /* CKAN's narrow containers are shallower than the Bootstrap row gutters. */
+  .auscope-core-form-page,
+  body:has(.auscope-core-form-page) .auscope-footer__main {
+    margin-inline: 0;
+  }
+
+  .auscope-core-form-stage {
+    flex-basis: 100%;
+  }
+
+  .auscope-core-form-page > .primary .module-content {
+    padding-inline: 1rem;
+  }
+}

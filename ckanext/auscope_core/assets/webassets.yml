@@ -25,6 +25,30 @@ auscope-core-vocabulary-picker:
   output: ckanext-auscope_core/%(version)s-auscope-core-vocabulary-picker.js
   extra:
     preload:
-      - vendor/jquery
+      - base/main
   contents:
     - js/vocabulary-picker.js
+
+auscope-core-form-groups-css:
+  output: ckanext-auscope_core/%(version)s-auscope-core-form-groups.css
+  extra:
+    preload:
+      - auscope_core/auscope_core-tokens
+  contents:
+    - css/form-groups.css
+
+auscope-core-form-groups-js:
+  output: ckanext-auscope_core/%(version)s-auscope-core-form-groups.js
+  contents:
+    - js/form-groups.js
+  extra:
+    preload:
+      - base/main
+
+auscope-core-form-page-css:
+  output: ckanext-auscope_core/%(version)s-auscope-core-form-page.css
+  extra:
+    preload:
+      - auscope_core/auscope_core-tokens
+  contents:
+    - css/form-page.css

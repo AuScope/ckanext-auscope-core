@@ -1,0 +1,26 @@
+.auscope-core-form-groups .auscope-core-form-group {
+  border: 1px solid var(--auscope-color-border);
+  border-radius: var(--bs-border-radius, .25rem);
+  margin-block-end: 1rem;
+}
+
+.auscope-core-form-groups .auscope-core-form-group-heading {
+  padding: .75rem 1rem;
+  color: var(--auscope-color-primary);
+  background-color: var(--auscope-color-surface);
+  font-family: var(--auscope-font-family-medium);
+  cursor: pointer;
+}
+
+.auscope-core-form-groups .auscope-core-form-group-heading:focus-visible {
+  outline: var(--auscope-focus-ring-width) solid var(--auscope-focus-ring-color);
+  outline-offset: var(--auscope-focus-ring-offset);
+}
+
+.auscope-core-form-groups .auscope-core-form-group-body {
+  padding: 1rem;
+}
+
+.auscope-core-form-groups .auscope-core-form-group-body > :last-child {
+  margin-block-end: 0;
+}

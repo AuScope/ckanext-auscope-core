@@ -219,6 +219,10 @@ macro:
 
 ### Reusable UI components
 
+[Shared form page UI](docs/form-page.md) documents the opt-in stage indicator,
+form header and layout, navigation and action row. See
+[shared form groups](docs/form-groups.md) for disclosure sections.
+
 Use CKAN's built-in dataset/resource cards, organisation/group snippets and
 Bootstrap button, alert and badge classes by default. Core does not wrap those
 APIs. The reference review and exclusions are recorded in
@@ -436,6 +440,7 @@ the flattened input name and unique ID supplied by the row adapter. The picker
 refreshes its accessible references when a row is reindexed and handles row
 clear and removal through Composite events. The picker creates an unnamed
 Select2 control and persists values through the named hidden inputs.
+Its Webassets bundle preloads CKAN's `base/main` for the module loader and Select2.
 
 Each output mapping accepts a consumer field `name`, a `source` (`id`, `label`,
 `display`, or the normalized `selection` object), and a `format` (`first`, `csv`,

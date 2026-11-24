@@ -96,7 +96,11 @@ consumer adopt a component at one explicit call site.
 
 The current components are:
 
-- `page_section.html`, a macro around CKAN's native module classes; and
+- `page_section.html`, a macro around CKAN's native module classes.
+- [form page UI](form-page.md), opt-in presentation for stages, headers, navigation,
+  actions and the CKAN form layout. Consumers determine workflow and permissions.
+- [form groups](form-groups.md), an opt-in helper and disclosure component for
+  dataset forms.
 - `facet_select.html`, a native multi-select GET form extracted from the common
   Sample/PIDINST need. It has no JavaScript or third-party dependency and keeps
   repository-specific facet names and item sources in the caller.

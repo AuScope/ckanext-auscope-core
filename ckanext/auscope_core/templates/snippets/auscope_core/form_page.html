@@ -1,0 +1,60 @@
+{% macro form_stages(stages, label=none) %}
+  {% if stages %}
+    <ol class="auscope-core-form-stages" role="list" aria-label="{{ label or _('Form progress') }}">
+      {% for stage in stages %}
+        {% set current = ' aria-current="step"' | safe if stage.state == 'active' else '' %}
+        {% set state = stage.state if stage.state in ('active', 'completed') else 'upcoming' %}
+        {% set caption %}
+          <span class="auscope-core-form-stage-marker" aria-hidden="true">{{ '✓' if state == 'completed' else loop.index }}</span>
+          <span>
+            {{ stage.label }}
+            {% if state == 'completed' %}<span class="visually-hidden">({{ _('Completed') }})</span>{% endif %}
+            {% if state == 'upcoming' %}<span class="visually-hidden">({{ _('Upcoming') }})</span>{% endif %}
+          </span>
+        {% endset %}
+        <li class="auscope-core-form-stage auscope-core-form-stage--{{ state }}">
+          {% if stage.url %}
+            <a class="auscope-core-form-stage-label" href="{{ stage.url }}"{{ current }}>{{ caption }}</a>
+          {% elif stage.submit %}
+            <button class="auscope-core-form-stage-label" type="submit" name="{{ stage.submit.name }}"
+                    value="{{ stage.submit.value }}"{{ current }}>{{ caption }}</button>
+          {% else %}
+            <span class="auscope-core-form-stage-label"{{ current }}>{{ caption }}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+{% endmacro %}
+
+{% macro form_header(title, description=none, actions='', navigation='') %}
+  <header class="auscope-core-form-header">
+    <div class="auscope-core-form-title-row">
+      <div>
+        <h1>{{ title }}</h1>
+        {% if description %}<p class="auscope-core-form-description">{{ description }}</p>{% endif %}
+      </div>
+      {% if actions | trim %}<div class="auscope-core-form-header-actions">{{ actions }}</div>{% endif %}
+    </div>
+    {{ navigation }}
+  </header>
+{% endmacro %}
+
+{% macro form_navigation(label) %}
+  {% set items = caller() %}
+  {% if items | trim %}
+    <nav class="auscope-core-form-navigation" aria-label="{{ label }}">
+      <ul role="list">{{ items }}</ul>
+    </nav>
+  {% endif %}
+{% endmacro %}
+
+{% macro form_actions(primary='', secondary='', description='') %}
+  {% if primary | trim or secondary | trim or description | trim %}
+    <div class="form-actions auscope-core-form-actions">
+      {% if description | trim %}<div class="auscope-core-form-action-description">{{ description }}</div>{% endif %}
+      {% if secondary | trim %}<div class="auscope-core-form-action-group">{{ secondary }}</div>{% endif %}
+      {% if primary | trim %}<div class="auscope-core-form-action-group auscope-core-form-action-group--primary">{{ primary }}</div>{% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}

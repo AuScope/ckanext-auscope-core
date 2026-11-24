@@ -926,3 +926,22 @@ On CKAN 2.12.1 and Python 3.14.10, the guarded Core suite passed 243 tests
 in 31.03 seconds. The picker passed all 9 Node tests and Ruff reported no
 issues. The RAiD integration suite passed 16 Action API and Edge tests,
 including an outage and reindexing round trip for the ROR picker.
+
+## Shared dataset form sections
+
+Put field membership, section markup and opt-in styling in Core. Consumers
+choose the effective Scheming field list and keep field rendering, form stages
+and request handling. Use native disclosure controls so keyboard navigation and
+expansion work independently of Bootstrap's collapse implementation. RAiD is
+the initial consumer. See the [form groups contract](form-groups.md).
+
+
+## Shared form page UI
+
+Keep CKAN's surrounding page and form blocks in the consumer and add an
+opt-in CSS bundle and macros for the stage strip, form header, navigation and
+wrapping action row. Use Core's existing palette and form group styling.
+Static stages stay outside the keyboard tab order. Consumers can opt into
+native links or submit buttons using their existing routes and values.
+RAiD presents a single metadata stage on create and keeps its edit
+navigation. See the [form page UI contract](form-page.md).

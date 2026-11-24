@@ -61,6 +61,9 @@ def test_webassets_bundles_reference_existing_files():
         "auscope_core-css",
         "auscope_core-js",
         "auscope-core-vocabulary-picker",
+        "auscope-core-form-groups-css",
+        "auscope-core-form-groups-js",
+        "auscope-core-form-page-css",
     }
     for bundle in bundles.values():
         assert bundle["output"].startswith("ckanext-auscope_core/")

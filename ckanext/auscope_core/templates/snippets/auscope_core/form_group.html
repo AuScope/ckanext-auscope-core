@@ -1,0 +1,9 @@
+{% macro form_group(id, heading, description, expanded) %}
+  <details class="auscope-core-form-group" id="{{ id }}"{% if expanded %} open{% endif %}>
+    <summary class="auscope-core-form-group-heading">{{ heading }}</summary>
+    <div class="auscope-core-form-group-body">
+      {% if description %}<p>{{ description }}</p>{% endif %}
+      {{ caller() }}
+    </div>
+  </details>
+{% endmacro %}

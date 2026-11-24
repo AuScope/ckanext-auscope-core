@@ -5,6 +5,7 @@ from ckan.common import CKANConfig
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
+from ckanext.auscope_core.form_groups import form_groups
 from ckanext.auscope_core.services.vocabulary.epsg import (
     DEFAULT_BASE_URL as DEFAULT_EPSG_BASE_URL,
 )
@@ -46,6 +47,13 @@ class AuscopeCorePlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint)
     plugins.implements(plugins.IConfigDeclaration)
     plugins.implements(plugins.IConfigurable)
+    plugins.implements(plugins.ITemplateHelpers)
+
+    def get_helpers(self):
+        return {
+            "auscope_core_form_groups": form_groups,
+            "auscope_core_form_page_available": lambda: True,
+        }
 
     # IConfigurer
     def update_config(self, config_: CKANConfig) -> None:
